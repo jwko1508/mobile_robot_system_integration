@@ -1,1 +1,2 @@
-test
+# ipTime N3U doesn't work.
+I had bought the ipTime N3U, but it doesn't work in ubuntu 14.04, so I tried to install the driver of N3U (Realtek rtl8192eu-linux-driver), it was impossible to install. Because linux kernel of STEP computer (embedded computer) is customed. so, I can't find this kernel. therefore I bought the new tp link wireless USB adapter. it was made before 2014. so I anticipate it will work properly in Step computer.
