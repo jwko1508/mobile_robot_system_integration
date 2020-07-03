@@ -23,6 +23,11 @@ enum Omron_command
   omron_stop,
   omron_move
 };
+enum Indy_command
+{
+  moveHome = 100,
+  moveZero
+};
 
 bool emergency_state = false;
 bool isCoffee = false;
@@ -50,7 +55,7 @@ void darknet_cb(const darknet_ros_msgs::ObjectCount& msg)
   }
 }
 
-bool Service_set_bool(ros::ServiceClient& srv_client,
+bool Call_service_and_move_next_flow(ros::ServiceClient& srv_client,
                       std_srvs::SetBool& srv,
                       int flow_after_successive_call)
 {
@@ -79,7 +84,7 @@ int main(int argc, char **argv)
   ros::Subscriber darknet_sub = n.subscribe("/darknet_ros/found_object", 10, darknet_cb);
 
   ros::ServiceClient service_omron_client = n.serviceClient<std_srvs::SetBool>("control_omron");
-  ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<std_srvs::SetBool>("setBool");
+  ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<std_srvs::SetBool>("control_indy7");
 
   while(ros::ok())
   {
@@ -89,11 +94,11 @@ int main(int argc, char **argv)
       {
 //        cout << "listening" << endl;
         ros::spinOnce();
-        if(isCoffee)
-        {
+//        if(isCoffee)
+//        {
           cout << "I has listened." << endl;
           robot_behavior_flow = go_to_goal_by_using_omron;
-        }
+//        }
         break;
       }
 
@@ -102,7 +107,7 @@ int main(int argc, char **argv)
         cout << "go_to_goal_by_using_omron" << endl;
         std_srvs::SetBool srv;
         srv.request.data = gotogoal1;
-        if(!Service_set_bool(service_omron_client, srv, control_indy7_to_pick_up))
+        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
           return 0;
         sleep(1);
         break;
@@ -112,8 +117,8 @@ int main(int argc, char **argv)
       {
         cout << "control_indy7_to_pick_up" << endl;
         std_srvs::SetBool srv;
-        srv.request.data = 3;
-        if(!Service_set_bool(control_indy7_to_pick_up_cl, srv, check_to_pick_up_complete))
+        srv.request.data = gotogoal2;
+        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
           return 0;
         cout << "srv.response.success : " << srv.response.success << endl;
         break;
@@ -121,49 +126,49 @@ int main(int argc, char **argv)
 
       case check_to_pick_up_complete:
       {
-        cout << "checking.." << endl;
-        std_srvs::SetBool srv;
-        srv.request.data = 2;
-
-        if(!Service_set_bool(control_indy7_to_pick_up_cl, srv, check_to_pick_up_complete))
-          return 0;
-
-        int detection_count_threshold = 3;
-        cout << "check complete." << endl;
-        auto past_time = ros::Time::now().toSec();
-        while(ros::Time::now().toSec() - past_time <= 5.0)
-        {
-          ros::spinOnce();
-          if(detection_count > detection_count_threshold)
-          {
-            robot_behavior_flow = go_to_home_by_using_omron;
-            break;
-          }
-        }
-        if(detection_count <= detection_count_threshold)
-        {
-          cout << "I'll unwillingly back to control_indy7_to_pick_up state." << endl;
-          robot_behavior_flow = control_indy7_to_pick_up;
-        }
-        detection_count = 0;
-        break;
+//        cout << "checking.." << endl;
+//        std_srvs::SetBool srv;
+//        srv.request.data = 2;
+//
+//        if(!Service_set_bool(control_indy7_to_pick_up_cl, srv, check_to_pick_up_complete))
+//          return 0;
+//
+//        int detection_count_threshold = 3;
+//        cout << "check complete." << endl;
+//        auto past_time = ros::Time::now().toSec();
+//        while(ros::Time::now().toSec() - past_time <= 5.0)
+//        {
+//          ros::spinOnce();
+//          if(detection_count > detection_count_threshold)
+//          {
+//            robot_behavior_flow = go_to_home_by_using_omron;
+//            break;
+//          }
+//        }
+//        if(detection_count <= detection_count_threshold)
+//        {
+//          cout << "I'll unwillingly back to control_indy7_to_pick_up state." << endl;
+//          robot_behavior_flow = control_indy7_to_pick_up;
+//        }
+//        detection_count = 0;
+//        break;
       }
 
       case go_to_home_by_using_omron:
       {
-        cout << "I'm going home~ ^_^" << endl;
-        robot_behavior_flow = hand_over_something;
-        break;
+//        cout << "I'm going home~ ^_^" << endl;
+//        robot_behavior_flow = hand_over_something;
+//        break;
       }
 
       case hand_over_something:
       {
-        cout << "here you are~" << endl;
-
-        robot_behavior_flow = listening;
-        isCoffee = false;
-        isDetectComplete = false;
-        break;
+//        cout << "here you are~" << endl;
+//
+//        robot_behavior_flow = listening;
+//        isCoffee = false;
+//        isDetectComplete = false;
+//        break;
       }
       default:
         cout << "Unknown case robot stats : [" << robot_behavior_flow << "]" << endl;
