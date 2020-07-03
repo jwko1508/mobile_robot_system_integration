@@ -197,7 +197,7 @@ Omron_State StringToDouble(char * buffer)
         numOfCharacters = secondIndex - firstIndex + 1;
         string raw_location_str = receiveData.substr(firstIndex, numOfCharacters);
 
-        cout << "raw_location_str : " << raw_location_str << endl;
+        cout << "raw_location_2str : " << raw_location_str << endl;
 //        cout << 6.1 << endl;
         strcpy(raw_location, raw_location_str.c_str());
 //        cout << 6.101 << endl;

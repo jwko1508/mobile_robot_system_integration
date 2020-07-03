@@ -3,6 +3,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include "visualization_msgs/Marker.h"
+#include "std_srvs/SetBool.h"
 
 
 #include <netdb.h>
@@ -31,7 +32,7 @@ struct Omron_State
     double Temperature;
 };
 
-Omron_State omron_state;
+
 
 #define MAX 4096
 #define PORT 7171
@@ -39,15 +40,91 @@ Omron_State omron_state;
 #define TRUE 1
 #define FALSE 0
 
+Omron_State omron_state;
+unsigned char g_Command = 0;
+bool isInputOneCommand = false;
+
+enum Omron_command
+{
+  gotogoal1 = 1, // 1
+  gotogoal2, // 2
+  gotogoal3, // ...
+  gotogoal4,
+  gotogoal5,
+  omron_stop,
+  omron_move,
+  omron_success,
+  omron_fail
+};
+
 // 현재 receive 함수만 만들었음 이제 연결해줘야 함. plc 수업 가기전 주석 200527 1329
+
+bool OmronServerCB(std_srvs::SetBool::Request  &req,
+                   std_srvs::SetBool::Response &res)
+{
+  ros::Rate loop_rate(10);
+  cout << "Omron Server CB is requested..." << endl;
+  switch (req.data)
+  {
+    case gotogoal1:
+    {
+      ROS_INFO("I'm going to goal1.");
+      g_Command = gotogoal1;
+      while(ros::ok())
+      {
+        if(g_Command == omron_success)
+        {
+          res.message = "I arrived at Goal1.";
+          res.success = true;
+          g_Command = 0;
+          return true;
+        }
+        else if(g_Command == omron_fail)
+        {
+          res.message = "Fail Goal1 :(";
+          res.success = false;
+          g_Command = 0;
+          return true;
+        }
+      }
+      break;
+    }
+    case gotogoal2:
+    {
+      ROS_INFO("I'm going to goal2.");
+      g_Command = gotogoal2;
+      while(ros::ok())
+      {
+        if(g_Command == omron_success)
+        {
+          res.message = "I arrived at Goal2.";
+          res.success = true;
+          g_Command = 0;
+          return true;
+        }
+        else if(g_Command == omron_fail)
+        {
+          res.message = "Fail Goal2 :(";
+          res.success = false;
+          g_Command = 0;
+          return true;
+        }
+      }
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+
+
+}
 
 
 Omron_State StringToDouble(char * buffer)
 {
-    omron_state.location = {0};
-    omron_state.statusOfCharge = 0;
-    omron_state.status = "";
-    omron_state.Temperature = 0;
+
 
 //    cout << 1 << endl;
 //    char* tok1 = strtok(buffer, ": ");
@@ -134,6 +211,11 @@ Omron_State StringToDouble(char * buffer)
 
 void do_stuff(int* publish_rate)
 {
+  omron_state.location = {0};
+  omron_state.statusOfCharge = 0;
+  omron_state.status = "";
+  omron_state.Temperature = 0;
+
   ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
 
   ros::Publisher vis_pub = node->advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
@@ -185,6 +267,8 @@ void do_stuff(int* publish_rate)
   ros::Rate loop_rate(*publish_rate);
   while (ros::ok())
   {
+
+
     strcpy(message,"onelinestatus\r\n");
     bzero(buffer, sizeof(buffer));
     if( send(clientSocket , message , strlen(message) , 0) < 0)
@@ -202,6 +286,63 @@ void do_stuff(int* publish_rate)
 //      cout << 0 << endl;
 
     StringToDouble(receiveStatus_p);
+
+    if(g_Command == gotogoal1)
+    {
+      if(!isInputOneCommand)
+      {
+        strcpy(message,"goto goal1\r\n");
+        bzero(buffer, sizeof(buffer));
+        cout << "goto goal1!!" << endl;
+        if( send(clientSocket , message , strlen(message) , 0) < 0)
+        {
+          printf("Send failed\n");
+        }
+        isInputOneCommand = true;
+      }
+
+      if(recv(clientSocket, buffer, 1024, 0) < 0)
+      {
+        printf("Receive failed\n");
+      }
+      strcpy(receiveStatus, buffer);
+      string receiveStatus_S = receiveStatus;
+
+      if(receiveStatus_S.find("Arrived at Goal1") >= 0)
+      {
+        cout << "we Arrived at Goal1" << endl;
+        isInputOneCommand = false;
+        g_Command = omron_success;
+      }
+    }
+    else if(g_Command == gotogoal2)
+    {
+      if(!isInputOneCommand)
+      {
+        strcpy(message,"goto goal2\r\n");
+        bzero(buffer, sizeof(buffer));
+        cout << "goto goal2!!" << endl;
+        if( send(clientSocket , message , strlen(message) , 0) < 0)
+        {
+          printf("Send failed\n");
+        }
+        isInputOneCommand = true;
+      }
+
+      if(recv(clientSocket, buffer, 1024, 0) < 0)
+      {
+        printf("Receive failed\n");
+      }
+      strcpy(receiveStatus, buffer);
+      string receiveStatus_S = receiveStatus;
+
+      if(receiveStatus_S.find("Arrived at Goal2") >= 0)
+      {
+        cout << "we Arrived at Goal2" << endl;
+        isInputOneCommand = false;
+        g_Command = omron_success;
+      }
+    }
 
     // tf publish
     static tf2_ros::TransformBroadcaster br;
@@ -252,8 +393,8 @@ void do_stuff(int* publish_rate)
 
 
     //Print the received message
-    printf("DR : %s\n",buffer);
-      cout << 10 << endl;
+//    printf("DR : %s\n",buffer);
+//      cout << 10 << endl;
 
     loop_rate.sleep();
   }
@@ -271,17 +412,9 @@ int main(int argc, char** argv)
   boost::thread thread_b(do_stuff, &rate_b);
 
   ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
+  ros::ServiceServer server_omron = node->advertiseService("control_omron", OmronServerCB);
 
-  ros::Rate loop_rate(10); // 10 Hz
-  while (ros::ok())
-  {
-    loop_rate.sleep();
-    // process any incoming messages in this thread
-    ros::spinOnce();
-  }
-
-  // wait the second thread to finish
-  thread_b.join();
+  ros::spin();
 
   return 0;
 }
