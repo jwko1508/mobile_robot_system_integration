@@ -15,3 +15,7 @@ After I use the tp-link wireless internet dongle, wireless internet worked very 
 [링크](https://stackoverflow.com/questions/51433055/how-to-setup-cmakelists-and-package-xml-for-generated-message-dependencies)에 들어가면 다른 패키지 빌드 디펜던시를 설정할 수 있다. 이런 방식으로 설정하면 됨.
 add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
 이게 핵심이다.
+
+# 2020-07-18
+## 계획
+오므론 모바일 로봇 Goal1 위치 이동 후 Goal2 위치 이동
