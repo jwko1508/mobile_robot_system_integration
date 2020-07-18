@@ -37,7 +37,7 @@ struct Omron_State
 #define MAX 4096
 #define PORT 7171
 #define SA struct sockaddr
-#define TRUE 1
+#define TRUE 1su
 #define FALSE 0
 
 Omron_State omron_state;
@@ -72,6 +72,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal1;
       while(ros::ok())
       {
+        cout << "아직 안나옴.1" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal1.";
@@ -95,6 +96,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal2;
       while(ros::ok())
       {
+        cout << "아직 안나옴.2" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal2.";
@@ -241,12 +243,13 @@ void do_stuff(int* publish_rate)
   //Set port number, using htons function
   serverAddr.sin_port = htons(7171);
   //Set IP address to localhost
-  serverAddr.sin_addr.s_addr = inet_addr("192.168.0.118");
+  serverAddr.sin_addr.s_addr = inet_addr("192.168.0.102");
   memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
   //Connect the socket to the server using the address
   addr_size = sizeof serverAddr;
   connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
 
+  cout << 1 << endl;
   strcpy(message,"admin\n");
   for (int i = 0; i < 2; ++i)
   {
