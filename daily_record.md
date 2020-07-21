@@ -1,3 +1,18 @@
+# 2020-05-25 ~ 2020-05-29
+## 학교 실습주간
+### 오므론 모바일 로봇 데이터 수신
+ <p align="center">
+ 그림 1
+  <img width="550" src="https://user-images.githubusercontent.com/40682993/88031200-38a36300-cb77-11ea-9fba-b5f508a3c531.png"> 
+ </p>
+그림 1과 같이 네트워크를 구성함. Indy 7은 임시적으로 유선으로 연결하였지만 차후, 무선 네트워크로 변경할 예정
+
+ <p align="center">
+ 그림 2
+  <img width="350" src="https://user-images.githubusercontent.com/40682993/88031490-a3549e80-cb77-11ea-93f5-7324c9132dd9.png"> 
+ </p>
+그림 2의 네트워크 소켓을 통해 유선 연결 후, 무선인터넷 설정을 통해 공유기와 연결 가능함. 자세한 내용은 오므론 모바일 로봇 매뉴얼 참고 [관련 링크](https://www.ia.omron.co.kr/products/product_detail.asp?list_code2=031010&prodPk=2368)
+
 # 2020-07-02
 ## ipTime N3U doesn't work.
 I had bought the ipTime N3U, but it doesn't work in ubuntu 14.04, so I tried to install the driver of N3U (Realtek rtl8192eu-linux-driver), it was impossible to install. Because linux kernel of STEP computer (embedded computer) is customed. so, I can't find this kernel. therefore I bought the new tp link wireless USB adapter. it was made before 2014. so I anticipate it will work properly in Step computer.
