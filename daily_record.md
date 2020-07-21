@@ -11,7 +11,7 @@
  그림 2
   <img width="350" src="https://user-images.githubusercontent.com/40682993/88031490-a3549e80-cb77-11ea-93f5-7324c9132dd9.png"> 
  </p>
-그림 2의 네트워크 소켓을 통해 유선 연결 후, 무선인터넷 설정을 통해 공유기와 연결 가능함. 자세한 내용은 오므론 모바일 로봇 매뉴얼 참고 [관련링크](https://www.ia.omron.co.kr/products/product_detail.asp?list_code2=031010&prodPk=2368)
+그림 2의 네트워크 소켓을 통해 유선 연결 후, 무선인터넷 설정을 통해 공유기와 연결 가능함. 자세한 내용은 오므론 모바일 로봇 매뉴얼 참고 [링크](https://www.ia.omron.co.kr/products/product_detail.asp?list_code2=031010&prodPk=2368)
 
 # 2020-07-02
 ## ipTime N3U doesn't work.
