@@ -11,7 +11,29 @@
  그림 2
   <img width="350" src="https://user-images.githubusercontent.com/40682993/88031490-a3549e80-cb77-11ea-93f5-7324c9132dd9.png"> 
  </p>
-그림 2의 네트워크 소켓을 통해 유선 연결 후, 무선인터넷 설정을 통해 공유기와 연결 가능함. 자세한 내용은 오므론 모바일 로봇 매뉴얼 참고 [링크](https://www.ia.omron.co.kr/products/product_detail.asp?list_code2=031010&prodPk=2368)
+그림 2의 네트워크 소켓을 통해 유선 연결 후, 무선인터넷 설정을 통해 공유기와 연결 가능함. 자세한 내용은 오므론 모바일 로봇 매뉴얼 참고 
+[링크](https://www.ia.omron.co.kr/products/product_detail.asp?list_code2=031010&prodPk=2368)
+
+오므론의 매뉴얼을 확인하면, (Advanced Robotics Command Language Reference Guide 의 141 페이지)
+```
+onelinestatus
+```
+명령어를 통해 다음의 정보를 얻을 수 있다.
+```
+Status: Arrived at <goal> BatteryVoltage: <volts_dc> Location: <X_mm> <Y_mm> <heading>
+Temperature: <degrees>
+```
+즉, x,y,heading 값을 통해 현재 로봇의 위치를 알 수 있으며, tf 관계를 정해줄 수 있음. 
+
+onelinestatus를 계속 입력해주어야 하므로 boost::thread를 이용해 병렬처리를 하여 계속 onelinestauts를 입력받을 수 있다. 그리고 통신은 tcp socket 통신을 이용함.
+
+ <p align="center">
+ 그림 3
+  <img width="550" src="https://user-images.githubusercontent.com/40682993/88032623-2de9cd80-cb79-11ea-9ecb-1b95b962b6c7.png"> 
+ </p>
+
+그림 3에서 Client는 개인 PC이고, Server는 omron mobile robot이다. 반복문을 통해 계속 onelinestuats를 요청하여 로봇으 현재 위치를 계속 수신할 수 있다.
+
 
 # 2020-07-02
 ## ipTime N3U doesn't work.
