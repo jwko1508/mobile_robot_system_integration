@@ -384,10 +384,6 @@ void get_command_and_behavior()
 
   while(ros::ok())
   {
-    if(recv(clientSocket, buffer, 1024, 0) < 0)
-    {
-      printf("Receive failed\n");
-    }
     char receiveStatus[MAX];
     strcpy(receiveStatus, buffer);
     char* receiveStatus_p = receiveStatus;
@@ -406,6 +402,7 @@ void get_command_and_behavior()
         isInputOneCommand = true;
       }
 
+      bzero(buffer, sizeof(buffer));
       if(recv(clientSocket, buffer, 1024, 0) < 0)
       {
         printf("Receive failed\n");
@@ -434,6 +431,7 @@ void get_command_and_behavior()
         isInputOneCommand = true;
       }
 
+      bzero(buffer, sizeof(buffer));
       if(recv(clientSocket, buffer, 1024, 0) < 0)
       {
         printf("Receive failed\n");
@@ -456,10 +454,11 @@ void get_command_and_behavior()
 void TestGlobalVariable()
 {
   ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
-  ros::Rate loop_late(5);
+  ros::Rate loop_late(2);
   while (ros::ok())
   {
-    ROS_INFO_STREAM(static_cast<int>(g_Command));
+    ROS_INFO_STREAM(__LINE__ << " : g_Command " << static_cast<int>(g_Command));
+    ROS_INFO_STREAM(__LINE__ << " : isInputOneCommand " << static_cast<int>(isInputOneCommand));
     loop_late.sleep();
   }
 
