@@ -85,4 +85,4 @@ add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
  그건 아니었음, CPU 연산량을 11%에서 0%으로 줄였지만, 문제가 해결되지 않음.
 
 ## 해야할 일 
-[] 백파일 녹화
+[ ] 백파일 녹화
