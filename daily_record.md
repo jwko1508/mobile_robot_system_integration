@@ -83,6 +83,22 @@ add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
  
  ---
  그건 아니었음, CPU 연산량을 11%에서 0%으로 줄였지만, 문제가 해결되지 않음.
+ 
+ ``` cpp
+   while(ros::ok())
+  {
+ //    if(recv(clientSocket, buffer, 1024, 0) < 0)
+//    {
+//      printf("Receive failed\n");
+//    }
+    char receiveStatus[MAX];
+    strcpy(receiveStatus, buffer);
+    char* receiveStatus_p = receiveStatus;
+    ...
+ ```
+ 
+while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 받다가 delay가 생긴것.
+그래도 100Hz로 바꾸면서 괜찮아짐.
 
 ## 해야할 일 
 [ ] 백파일 녹화
