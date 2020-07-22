@@ -80,4 +80,7 @@ add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
   <img width="550" src="https://user-images.githubusercontent.com/40682993/88146590-08bb9480-cc37-11ea-90d0-862b86b604a0.png"> 
  </p>
  그림  7-22-1과 같이 CPU와 과도할 때, 명령 전달 연산이 제대로 이뤄지지 않음. 즉, 쓰레드 연산이 우선순위에 밀린다. -> 반복문 연산을 100Hz로 제한하겠음.
+ 
+ ---
+ 그건 아니었음, CPU 연산량을 11%에서 0%으로 줄였지만, 문제가 해결되지 않음.
 
