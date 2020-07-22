@@ -34,6 +34,20 @@ onelinestatus를 계속 입력해주어야 하므로 boost::thread를 이용해 
 
 그림 3에서 Client는 개인 PC이고, Server는 omron mobile robot이다. 반복문을 통해 계속 onelinestuats를 요청하여 로봇으 현재 위치를 계속 수신할 수 있다.
 
+### Indy7 (뉴로메카) 연결 방식
+
+오므론과 동일하게 TCP 소켓 통신 방식이다. 다만, 명령을 위하여 뉴로메카에서 제공하는 IndyDCP 라이브러리를 이용해 명령을 STEP 컴퓨터에 전달한다.
+[링크](http://docs.neuromeka.com/2.3.0/kr/C++/section1/)를 참고한다.
+
+여기에서 C++ 를 사용하였는데, ROS에서 헤더파일을 추가하고자 한다면, 다음의 글[(링크)](https://roboticsbackend.com/ros-include-cpp-header-from-another-package/)을 참고해 헤더파일을 추가하면 된다. 
+
+여기서 주의할 점은 위 링크에는 없는 내용이 있는데, 다음과 같이 CMakelist.txt파일에 
+``` cpp
+add_executable(indy_dcp_test src/indy_dcp_test.cpp)
+target_link_libraries(indy_dcp_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+```
+**${PROJECT_NAME})** 을 꼭 추가해주어야 빌드가 완성된다.
+
 
 # 2020-07-02
 ## ipTime N3U doesn't work.
