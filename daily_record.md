@@ -102,3 +102,10 @@ while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 
 
 ## 해야할 일 
 [ ] 백파일 녹화
+
+<p align="center">
+ 그림 7-22-2
+  <img width="550" src="https://user-images.githubusercontent.com/40682993/88177548-06bbfa80-cc64-11ea-946e-f08633e421bf.png"> 
+ </p>
+ 
+  그림 7-22-2와 같이 mobile_system_integration 에 command값을 공유하도록 (수정이 용이하도록) 헤더파일을 추가하였음.
