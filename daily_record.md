@@ -70,3 +70,14 @@ add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
 # 2020-07-18
 ## 계획
 오므론 모바일 로봇 Goal1 위치 이동 후 Goal2 위치 이동
+
+# 2020-07-22
+## 이슈
+모바일 로봇은 성공적으로 움직이나 쓰레드가 과도하여 연산량을 100Hz로 제한할 예정
+
+ <p align="center">
+ 그림 7-22-1
+  <img width="550" src="https://user-images.githubusercontent.com/40682993/88146590-08bb9480-cc37-11ea-90d0-862b86b604a0.png"> 
+ </p>
+ 그림  7-22-1과 같이 CPU와 과도할 때, 명령 전달 연산이 제대로 이뤄지지 않음. 즉, 쓰레드 연산이 우선순위에 밀린다. -> 반복문 연산을 100Hz로 제한하겠음.
+
