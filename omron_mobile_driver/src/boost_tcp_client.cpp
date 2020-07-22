@@ -5,6 +5,7 @@
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
 
+#include "limits.h"
 
 #include <netdb.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@ struct Omron_State
 #define MAX 4096
 #define PORT 7171
 #define SA struct sockaddr
-#define TRUE 1su
+#define TRUE 1
 #define FALSE 0
 #define address "192.168.0.102"
 
@@ -63,8 +64,10 @@ enum Omron_command
 bool OmronServerCB(std_srvs::SetBool::Request  &req,
                    std_srvs::SetBool::Response &res)
 {
-  ros::Rate loop_rate(10);
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(100);
   cout << "Omron Server CB is requested..." << endl;
+  cout << __LINE__ << "req.data " << static_cast<int>(req.data) << endl;
   switch (req.data)
   {
     case gotogoal1:
@@ -73,7 +76,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal1;
       while(ros::ok())
       {
-        cout << "아직 안나옴.1" << endl;
+//        cout << "아직 안나옴.1" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal1.";
@@ -88,6 +91,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
           g_Command = 0;
           return true;
         }
+        loop_late.sleep();
       }
       break;
     }
@@ -97,7 +101,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal2;
       while(ros::ok())
       {
-        cout << "아직 안나옴.2" << endl;
+//        cout << "아직 안나옴.2" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal2.";
@@ -112,6 +116,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
           g_Command = 0;
           return true;
         }
+        loop_late.sleep();
       }
       break;
     }
@@ -181,7 +186,7 @@ Omron_State StringToDouble(char * buffer)
         firstIndex += 13;
         string temperature_str = receiveData.substr(firstIndex);
         omron_state.Temperature = atof(temperature_str.c_str());
-
+//
 //        printf("omron_status : \n");
 //        printf("status : %s\n", omron_state.status.c_str());
 //        printf("statusOfCharge : %f\n", omron_state.statusOfCharge);
@@ -338,6 +343,9 @@ void do_stuff(int* publish_rate)
 
 void get_command_and_behavior()
 {
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(100);
+
   char message[1000];
   char buffer[MAX];
   int clientSocket;
@@ -390,7 +398,7 @@ void get_command_and_behavior()
       {
         strcpy(message,"goto goal1\r\n");
         bzero(buffer, sizeof(buffer));
-        cout << "goto goal1!!" << endl;
+        cout << __LINE__ << " : "  << "goto goal1!!" << endl;
         if( send(clientSocket , message , strlen(message) , 0) < 0)
         {
           printf("Send failed\n");
@@ -404,8 +412,8 @@ void get_command_and_behavior()
       }
       strcpy(receiveStatus, buffer);
       string receiveStatus_S = receiveStatus;
-
-      if(receiveStatus_S.find("Arrived at Goal1") >= 0)
+      cout << __LINE__ << " : "  << receiveStatus_S << endl;
+      if(receiveStatus_S.find("Arrived at Goal1") < UINT32_MAX)
       {
         cout << "we Arrived at Goal1" << endl;
         isInputOneCommand = false;
@@ -418,7 +426,7 @@ void get_command_and_behavior()
       {
         strcpy(message,"goto goal2\r\n");
         bzero(buffer, sizeof(buffer));
-        cout << "goto goal2!!" << endl;
+        cout << __LINE__ << "goto goal2!!" << endl;
         if( send(clientSocket , message , strlen(message) , 0) < 0)
         {
           printf("Send failed\n");
@@ -433,14 +441,28 @@ void get_command_and_behavior()
       strcpy(receiveStatus, buffer);
       string receiveStatus_S = receiveStatus;
 
-      if(receiveStatus_S.find("Arrived at Goal2") >= 0)
+      cout << __LINE__ << " : "  << receiveStatus_S << endl;
+      if(receiveStatus_S.find("Arrived at Goal2") < UINT32_MAX)
       {
         cout << "we Arrived at Goal2" << endl;
         isInputOneCommand = false;
         g_Command = omron_success;
       }
     }
+    loop_late.sleep();
   }
+}
+
+void TestGlobalVariable()
+{
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(5);
+  while (ros::ok())
+  {
+    ROS_INFO_STREAM(static_cast<int>(g_Command));
+    loop_late.sleep();
+  }
+
 }
 
 int main(int argc, char** argv)
@@ -452,6 +474,7 @@ int main(int argc, char** argv)
   // spawn another thread
   boost::thread thread_b(do_stuff, &rate_b);
   boost::thread thread_c(get_command_and_behavior);
+  boost::thread test_global(TestGlobalVariable);
 
   ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
   ros::ServiceServer server_omron = node->advertiseService("control_omron", OmronServerCB);
