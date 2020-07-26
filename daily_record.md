@@ -109,3 +109,7 @@ while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 
  </p>
  
   그림 7-22-2와 같이 mobile_system_integration 에 command값을 공유하도록 (수정이 용이하도록) 헤더파일을 추가하였음.
+  
+  # 2020-07-27
+  ## visual studio code 설치
+  https://erdalpekel.de/?p=157 참고
