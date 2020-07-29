@@ -113,3 +113,8 @@ while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 
   # 2020-07-27
   ## visual studio code 설치
   https://erdalpekel.de/?p=157 참고
+  
+  # 2020-07-29
+  ## 윈도우에 있는 py 우분투에 옮길 때 이거 해줘야함.
+  https://askubuntu.com/questions/896860/usr-bin-env-python3-r-no-such-file-or-directory
+  
