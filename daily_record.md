@@ -119,3 +119,10 @@ while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 
   https://askubuntu.com/questions/896860/usr-bin-env-python3-r-no-such-file-or-directory
   
   # daily_pull_request test
+  
+  # 2020-07-30 - 작성자 : jwko1508
+  1. pip install speech-recognition
+  2. sudo apt install portaudio19-dev 
+  3. pip install pyaudio
+  
+  
