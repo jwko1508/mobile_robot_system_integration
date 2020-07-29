@@ -118,3 +118,4 @@ while문 초반에 **recv**를 해서 문제였음.  여기서 계속 수신값 
   ## 윈도우에 있는 py 우분투에 옮길 때 이거 해줘야함.
   https://askubuntu.com/questions/896860/usr-bin-env-python3-r-no-such-file-or-directory
   
+  # daily_pull_request test
