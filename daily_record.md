@@ -124,6 +124,20 @@ https://github.com/jwko1508/test/pull/2 풀리퀘스트 하는 방법
   
   # 2020-07-30
   ## 작성자 : jwko1508
-  1. pip install speech-recognition
-  2. sudo apt install portaudio19-dev 
-  3. pip install pyaudio
+  1. speech-recognition 설치
+```
+pip install speech-recognition
+```
+     단순히 설치만 해주면 
+  2. pyaudio 설치
+     
+     pyaudio만 설치 하게되면 오류 발생
+```
+sudo apt install portaudio19-dev 
+```
+
+     따라서 오류를 해결하기 위해 portaudio19-dev를 설치
+```
+pip install pyaudio
+```
+     그 후 pyaudio를 설치하고 작성한 speech-recognition 코드를 실행하면 성공
