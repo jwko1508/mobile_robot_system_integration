@@ -137,7 +137,9 @@ sudo apt install portaudio19-dev
 ```
 
      따라서 오류를 해결하기 위해 portaudio19-dev를 설치
+
 ```
 pip install pyaudio
 ```
+
      그 후 pyaudio를 설치하고 작성한 speech-recognition 코드를 실행하면 성공
