@@ -3,31 +3,9 @@
 #include "std_srvs/SetBool.h"
 #include "std_msgs/String.h"
 #include "darknet_ros_msgs/ObjectCount.h"
+#include "mobile_system_integration/OmronIndyCommand.h"
 
 #include <cstdlib>
-
-#define listening 1
-#define go_to_goal_by_using_omron 2
-#define control_indy7_to_pick_up 3
-#define check_to_pick_up_complete 4
-#define go_to_home_by_using_omron 5
-#define hand_over_something 6
-
-enum Omron_command
-{
-  gotogoal1 = 1, // 1
-  gotogoal2, // 2
-  gotogoal3, // ...
-  gotogoal4,
-  gotogoal5,
-  omron_stop,
-  omron_move
-};
-enum Indy_command
-{
-  moveHome = 100,
-  moveZero
-};
 
 bool emergency_state = false;
 bool isCoffee = false;
