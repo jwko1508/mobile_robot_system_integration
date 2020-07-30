@@ -4,6 +4,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
+#include "mobile_system_integration/OmronIndyCommand.h"
 
 #include "limits.h"
 
@@ -46,18 +47,6 @@ Omron_State omron_state;
 unsigned char g_Command = 0;
 bool isInputOneCommand = false;
 
-enum Omron_command
-{
-  gotogoal1 = 1, // 1
-  gotogoal2, // 2
-  gotogoal3, // ...
-  gotogoal4,
-  gotogoal5,
-  omron_stop,
-  omron_move,
-  omron_success,
-  omron_fail
-};
 
 // 현재 receive 함수만 만들었음 이제 연결해줘야 함. plc 수업 가기전 주석 200527 1329
 
