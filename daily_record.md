@@ -8,3 +8,5 @@ I had bought the ipTime N3U, but it doesn't work in ubuntu 14.04, so I tried to 
 # 2020-07-05
 ## The wireless Internet of the STEP is now working well.
 After I use the tp-link wireless internet dongle, wireless internet worked very well. It's satisfying.
+
+develop test 

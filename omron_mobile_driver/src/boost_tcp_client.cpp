@@ -5,6 +5,7 @@
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
 
+#include "limits.h"
 
 #include <netdb.h>
 #include <stdio.h>
@@ -39,6 +40,7 @@ struct Omron_State
 #define SA struct sockaddr
 #define TRUE 1
 #define FALSE 0
+#define address "192.168.0.102"
 
 Omron_State omron_state;
 unsigned char g_Command = 0;
@@ -62,8 +64,10 @@ enum Omron_command
 bool OmronServerCB(std_srvs::SetBool::Request  &req,
                    std_srvs::SetBool::Response &res)
 {
-  ros::Rate loop_rate(10);
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(100);
   cout << "Omron Server CB is requested..." << endl;
+  cout << __LINE__ << "req.data " << static_cast<int>(req.data) << endl;
   switch (req.data)
   {
     case gotogoal1:
@@ -72,6 +76,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal1;
       while(ros::ok())
       {
+//        cout << "아직 안나옴.1" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal1.";
@@ -86,6 +91,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
           g_Command = 0;
           return true;
         }
+        loop_late.sleep();
       }
       break;
     }
@@ -95,6 +101,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
       g_Command = gotogoal2;
       while(ros::ok())
       {
+//        cout << "아직 안나옴.2" << endl;
         if(g_Command == omron_success)
         {
           res.message = "I arrived at Goal2.";
@@ -109,6 +116,7 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
           g_Command = 0;
           return true;
         }
+        loop_late.sleep();
       }
       break;
     }
@@ -124,19 +132,14 @@ bool OmronServerCB(std_srvs::SetBool::Request  &req,
 
 Omron_State StringToDouble(char * buffer)
 {
-
-
-//    cout << 1 << endl;
 //    char* tok1 = strtok(buffer, ": ");
     string receiveData = buffer;
     long firstIndex;
     long secondIndex;
     long numOfCharacters;
-//    cout << 2 << endl;
-    cout << "receiveData : " << receiveData << endl;
+//    cout << "receiveData : " << receiveData << endl;
     if( (firstIndex = receiveData.find("Status")) >= 0 )
     {
-//        cout << 3 << endl;
         // 012345678
         // status: s~    , (s~는 어떤 문자열으 시작을 의미함.)
         firstIndex += 8; // 8번째 인덱스 후에 우리가 원하는 데이터에 접근 가능함.
@@ -145,7 +148,6 @@ Omron_State StringToDouble(char * buffer)
         numOfCharacters = secondIndex - firstIndex + 1;
         omron_state.status = receiveData.substr(firstIndex, numOfCharacters);
 
-//        cout << 4 << endl;
         firstIndex = receiveData.find("StateOfCharge");
         // 0123456789 10 11 12 13 14 15
         // StateOfCha r  g  e  :     s~
@@ -155,10 +157,9 @@ Omron_State StringToDouble(char * buffer)
         numOfCharacters = secondIndex - firstIndex + 1;
         string statusOfCharge_str = receiveData.substr(firstIndex, numOfCharacters);
 
-        cout << "statusOfCharge_str : " << statusOfCharge_str << endl;
+//        cout << "statusOfCharge_str : " << statusOfCharge_str << endl;
         omron_state.statusOfCharge = atof(statusOfCharge_str.c_str());
 
-//        cout << 5 << endl;
         firstIndex = receiveData.find("Location");
         // 0123456789 10
         // Location:
@@ -166,40 +167,33 @@ Omron_State StringToDouble(char * buffer)
         secondIndex = receiveData.find("Temperature");
         secondIndex -= 2;
 
-//        cout << 6 << endl;
         char* raw_location = new char(); // 메모리 할당을 해줘야 strcpy가 실행됨
         numOfCharacters = secondIndex - firstIndex + 1;
         string raw_location_str = receiveData.substr(firstIndex, numOfCharacters);
 
-        cout << "raw_location_str : " << raw_location_str << endl;
-//        cout << 6.1 << endl;
+
         strcpy(raw_location, raw_location_str.c_str());
-//        cout << 6.101 << endl;
         char *tok1 = strtok(raw_location, " ");
-//        cout << 6.11 << endl;
         omron_state.location.x = atof(tok1);
         tok1 = strtok(NULL, " ");
-//        cout << 6.2 << endl;
         omron_state.location.y = atof(tok1);
         tok1 = strtok(NULL, " ");
         omron_state.location.heading = atof(tok1);
 
-//        cout << 7 << endl;
         firstIndex = receiveData.find("Temperature");
         // 0123456789 10 11 12 13
         // Temperatur e  :
         firstIndex += 13;
         string temperature_str = receiveData.substr(firstIndex);
         omron_state.Temperature = atof(temperature_str.c_str());
-
-//        cout << 8 << endl;
-        printf("omron_status : \n");
-        printf("status : %s\n", omron_state.status.c_str());
-        printf("statusOfCharge : %f\n", omron_state.statusOfCharge);
-        printf("x : %f\n", omron_state.location.x);
-        printf("y : %f\n", omron_state.location.y);
-        printf("heading : %f\n", omron_state.location.heading);
-        printf("temperature : %f\n", omron_state.Temperature);
+//
+//        printf("omron_status : \n");
+//        printf("status : %s\n", omron_state.status.c_str());
+//        printf("statusOfCharge : %f\n", omron_state.statusOfCharge);
+//        printf("x : %f\n", omron_state.location.x);
+//        printf("y : %f\n", omron_state.location.y);
+//        printf("heading : %f\n", omron_state.location.heading);
+//        printf("temperature : %f\n", omron_state.Temperature);
 
 
 
@@ -241,7 +235,7 @@ void do_stuff(int* publish_rate)
   //Set port number, using htons function
   serverAddr.sin_port = htons(7171);
   //Set IP address to localhost
-  serverAddr.sin_addr.s_addr = inet_addr("192.168.0.118");
+  serverAddr.sin_addr.s_addr = inet_addr(address);
   memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
   //Connect the socket to the server using the address
   addr_size = sizeof serverAddr;
@@ -287,62 +281,7 @@ void do_stuff(int* publish_rate)
 
     StringToDouble(receiveStatus_p);
 
-    if(g_Command == gotogoal1)
-    {
-      if(!isInputOneCommand)
-      {
-        strcpy(message,"goto goal1\r\n");
-        bzero(buffer, sizeof(buffer));
-        cout << "goto goal1!!" << endl;
-        if( send(clientSocket , message , strlen(message) , 0) < 0)
-        {
-          printf("Send failed\n");
-        }
-        isInputOneCommand = true;
-      }
 
-      if(recv(clientSocket, buffer, 1024, 0) < 0)
-      {
-        printf("Receive failed\n");
-      }
-      strcpy(receiveStatus, buffer);
-      string receiveStatus_S = receiveStatus;
-
-      if(receiveStatus_S.find("Arrived at Goal1") >= 0)
-      {
-        cout << "we Arrived at Goal1" << endl;
-        isInputOneCommand = false;
-        g_Command = omron_success;
-      }
-    }
-    else if(g_Command == gotogoal2)
-    {
-      if(!isInputOneCommand)
-      {
-        strcpy(message,"goto goal2\r\n");
-        bzero(buffer, sizeof(buffer));
-        cout << "goto goal2!!" << endl;
-        if( send(clientSocket , message , strlen(message) , 0) < 0)
-        {
-          printf("Send failed\n");
-        }
-        isInputOneCommand = true;
-      }
-
-      if(recv(clientSocket, buffer, 1024, 0) < 0)
-      {
-        printf("Receive failed\n");
-      }
-      strcpy(receiveStatus, buffer);
-      string receiveStatus_S = receiveStatus;
-
-      if(receiveStatus_S.find("Arrived at Goal2") >= 0)
-      {
-        cout << "we Arrived at Goal2" << endl;
-        isInputOneCommand = false;
-        g_Command = omron_success;
-      }
-    }
 
     // tf publish
     static tf2_ros::TransformBroadcaster br;
@@ -402,14 +341,139 @@ void do_stuff(int* publish_rate)
   close(clientSocket);
 }
 
+void get_command_and_behavior()
+{
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(100);
+
+  char message[1000];
+  char buffer[MAX];
+  int clientSocket;
+  struct sockaddr_in serverAddr;
+  socklen_t addr_size;
+  // Create the socket.
+  clientSocket = socket(PF_INET, SOCK_STREAM, 0);
+  //Configure settings of the server address
+  // Address family is Internet
+  serverAddr.sin_family = AF_INET;
+  //Set port number, using htons function
+  serverAddr.sin_port = htons(7171);
+  //Set IP address to localhost
+  serverAddr.sin_addr.s_addr = inet_addr(address);
+  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
+  //Connect the socket to the server using the address
+  addr_size = sizeof serverAddr;
+  connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+
+  strcpy(message,"admin\n");
+  for (int i = 0; i < 2; ++i)
+  {
+    if(send(clientSocket , message , strlen(message) , 0) < 0)
+    {
+      printf("Send failed\n");
+    }
+    sleep(0.5);
+  }
+
+  std::string initialGuidance;
+  while(initialGuidance.find("End of") == -1)
+  {
+    recv(clientSocket, buffer, 1024, 0);
+    initialGuidance = buffer;
+  }
+
+  while(ros::ok())
+  {
+    char receiveStatus[MAX];
+    strcpy(receiveStatus, buffer);
+    char* receiveStatus_p = receiveStatus;
+
+    if(g_Command == gotogoal1)
+    {
+      if(!isInputOneCommand)
+      {
+        strcpy(message,"goto goal1\r\n");
+        bzero(buffer, sizeof(buffer));
+        cout << __LINE__ << " : "  << "goto goal1!!" << endl;
+        if( send(clientSocket , message , strlen(message) , 0) < 0)
+        {
+          printf("Send failed\n");
+        }
+        isInputOneCommand = true;
+      }
+
+      bzero(buffer, sizeof(buffer));
+      if(recv(clientSocket, buffer, 1024, 0) < 0)
+      {
+        printf("Receive failed\n");
+      }
+      strcpy(receiveStatus, buffer);
+      string receiveStatus_S = receiveStatus;
+      cout << __LINE__ << " : "  << receiveStatus_S << endl;
+      if(receiveStatus_S.find("Arrived at Goal1") < UINT32_MAX)
+      {
+        cout << "we Arrived at Goal1" << endl;
+        isInputOneCommand = false;
+        g_Command = omron_success;
+      }
+    }
+    else if(g_Command == gotogoal2)
+    {
+      if(!isInputOneCommand)
+      {
+        strcpy(message,"goto goal2\r\n");
+        bzero(buffer, sizeof(buffer));
+        cout << __LINE__ << "goto goal2!!" << endl;
+        if( send(clientSocket , message , strlen(message) , 0) < 0)
+        {
+          printf("Send failed\n");
+        }
+        isInputOneCommand = true;
+      }
+
+      bzero(buffer, sizeof(buffer));
+      if(recv(clientSocket, buffer, 1024, 0) < 0)
+      {
+        printf("Receive failed\n");
+      }
+      strcpy(receiveStatus, buffer);
+      string receiveStatus_S = receiveStatus;
+
+      cout << __LINE__ << " : "  << receiveStatus_S << endl;
+      if(receiveStatus_S.find("Arrived at Goal2") < UINT32_MAX)
+      {
+        cout << "we Arrived at Goal2" << endl;
+        isInputOneCommand = false;
+        g_Command = omron_success;
+      }
+    }
+    loop_late.sleep();
+  }
+}
+
+void TestGlobalVariable()
+{
+  ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
+  ros::Rate loop_late(2);
+  while (ros::ok())
+  {
+    ROS_INFO_STREAM(__LINE__ << " : g_Command " << static_cast<int>(g_Command));
+    ROS_INFO_STREAM(__LINE__ << " : isInputOneCommand " << static_cast<int>(isInputOneCommand));
+    loop_late.sleep();
+  }
+
+}
+
 int main(int argc, char** argv)
 {
-  int rate_b = 10; // 1 Hz
+  int rate_b = 100; // 1 Hz
 
   ros::init(argc, argv, "boost_tcp_client");
 
   // spawn another thread
   boost::thread thread_b(do_stuff, &rate_b);
+  boost::thread thread_c(get_command_and_behavior);
+  boost::thread test_global(TestGlobalVariable);
 
   ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
   ros::ServiceServer server_omron = node->advertiseService("control_omron", OmronServerCB);
