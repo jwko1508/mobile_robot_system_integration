@@ -8,14 +8,11 @@ import requests
 import numpy as np
 from std_msgs.msg import Float64MultiArray
 
-
 class GetMarkerPose:
     def __init__(self):
         self.marker_pub = rospy.Publisher('MarkerHomogeneousMatrix', Float64MultiArray, queue_size=10)
         self.session = requests.session()
         self.COMMAND_CUSTOM = '/detect/module/online/{}/{}'
-        
-        
 
     def get(self, command, timeout=1, **kwargs):
         resp = self.session.get(url+command, params=kwargs, timeout=timeout)
@@ -39,7 +36,7 @@ class GetMarkerPose:
         # print(self.rdict.keys())
         self.rrdict = self.rdict["batch"]
         self.object_pose_base_2nd_list = self.rrdict[0]['object_pose_base']
-        # std_msgs.msg.Float64MultiArray
+
     def FromTwoDimensionalToOneDimensionList(self):
         if self.object_pose_base_2nd_list == []:
             return
