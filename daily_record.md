@@ -129,10 +129,10 @@ https://github.com/jwko1508/test/pull/2 풀리퀘스트 하는 방법
 ```markdown
 pip install speech-recognition
 ```
-     단순히 설치만 해주면 끝
+단순히 설치만 해주면 끝
   2. pyaudio 설치
      
-     pyaudio만 설치 하게되면 오류 발생
+pyaudio만 설치 하게되면 오류 발생
 
 ```markdown
 sudo apt install portaudio19-dev 
