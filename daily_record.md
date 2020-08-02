@@ -147,3 +147,15 @@ pip install pyaudio
 ```
 
 그 후 pyaudio를 설치하고 작성한 speech-recognition 코드를 실행하면 성공
+
+# 2020-08-02
+## author : JIWAN HAN
+### build dependency
+ros에서 빌드 디펜던시 넣어줘야할 때, message generation 등,
+``` cmake
+## same as for the library above
+add_dependencies(publish_6d_pose ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(practice_custom_msg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+```
+
+이렇게 add_dependencies 꼭 해줘야함.
