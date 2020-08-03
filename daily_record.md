@@ -32,7 +32,7 @@ onelinestatus를 계속 입력해주어야 하므로 boost::thread를 이용해 
   <img width="550" src="https://user-images.githubusercontent.com/40682993/88032623-2de9cd80-cb79-11ea-9ecb-1b95b962b6c7.png"> 
  </p>
 
-그림 3에서 Client는 개인 PC이고, Server는 omron mobile robot이다. 반복문을 통해 계속 onelinestuats를 요청하여 로봇으 현재 위치를 계속 수신할 수 있다.
+그림 3에서 Client는 개인 PC이고, Server는 omron mobile robot이다. 반복문을 통해 계속 onelinestuats를 요청하여 로봇 현재 위치를 계속 수신할 수 있다.
 
 ### Indy7 (뉴로메카) 연결 방식
 
@@ -159,3 +159,11 @@ add_dependencies(practice_custom_msg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 ```
 
 이렇게 add_dependencies 꼭 해줘야함.
+
+# 2020-08-03
+## author : JIWAN HAN
+### 회의록 
+#### 참가자 : 고정우, 한지완
+음성인식을 눌러서 말하기 방식을 제거함.
+"하이 피터팬"을 말하면, 네 주인님 응답하고 주인의 명령을 듣는 방식으로 변경하기로 결정함.
+음성인식 노드와 behavior 선택 노드 연결을 위해 코드[(링크)](https://github.com/hjw1399/mobile_robot_system_integration/tree/develop/mobile_system_integration)를 정우에게 설명함. 
