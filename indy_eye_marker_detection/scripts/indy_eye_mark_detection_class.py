@@ -36,6 +36,7 @@ class GetMarkerPose:
         # print(self.rdict.keys())
         self.rrdict = self.rdict["batch"]
         self.object_pose_base_2nd_list = self.rrdict[0]['object_pose_base']
+        print(self.object_pose_base_2nd_list)
 
     def FromTwoDimensionalToOneDimensionList(self):
         if self.object_pose_base_2nd_list == []:
