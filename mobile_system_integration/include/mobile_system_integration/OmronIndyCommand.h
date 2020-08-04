@@ -23,7 +23,9 @@ enum Indy_command
 {
   moveHome = 100,
   moveZero,
-  getObject
+  getObjectPose,
+  indy_success,
+  indy_fail
 };
 
 #endif

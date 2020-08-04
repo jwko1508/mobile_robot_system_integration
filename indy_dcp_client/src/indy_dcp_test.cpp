@@ -10,6 +10,7 @@
 
 #include "sensor_msgs/JointState.h"
 #include "visualization_msgs/Marker.h"
+#include "std_srvs/SetBool.h"
 
 //#include "geometry_msgs"
 
@@ -19,17 +20,70 @@ using namespace NRMKIndy::Service::DCP;
 
 class Indy7DCPClient
 {
+
+private:
+    IndyDCPConnector connector;
+    ros::NodeHandle nh;
+    ros::Publisher joint_state_pub;
+    ros::ServiceServer server_indy7;
+
+    unsigned char m_Command;
+
+    ros::Rate rate100;
+    
 public:
     Indy7DCPClient(string robotIP) : connector(robotIP, ROBOT_INDY7),
-                                    joint_state_pub(nh.advertise<sensor_msgs::JointState>("joint_states", 10))
+                                     joint_state_pub(nh.advertise<sensor_msgs::JointState>("joint_states", 10)),
+                                     m_Command(0),
+                                     rate100(100)
     {
         ROS_INFO_STREAM("INDY7DCP Client init!");
         cout << "Connecting to the robot" << endl;
         connector.connect();
+        server_indy7 = nh.advertiseService("control_indy", &Indy7DCPClient::IndyServerCB, this);
     }
     ~Indy7DCPClient()
     {
 
+    }
+
+    bool IndyServerCB(std_srvs::SetBool::Request  &req,
+                        std_srvs::SetBool::Response &res)
+    {
+        
+         switch (req.data)
+        {
+            case moveHome:
+            {
+                ROS_INFO("I'm moving home.");
+                res.message = "I moved home.";
+                cout << "Go to home position" << endl;
+                connector.moveJointHome();
+                WaitFinish(connector);
+
+                res.success = true;
+                return true;
+
+                break;
+            }
+            case moveZero:
+            {
+                ROS_INFO("I'm moving zero positon.");
+                res.message = "I moved zero positon.";
+                cout << "Go to zero position" << endl;
+                connector.moveJointZero();
+                WaitFinish(connector);
+
+                res.success = true;
+                return true;
+                
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
     }
 
     void WaitFinish(IndyDCPConnector& connector) {
@@ -103,11 +157,6 @@ public:
             connector.moveJointHome();
             WaitFinish(connector);
 
-    //        cout << "Current joint values: " << endl;
-    //        connector.getJointPosition(q);
-    //        for(int i = 0;i<6;i++){ cout << q[i] << ","; }
-    //        cout << endl;
-
             cout << "Rotate last joint by 10 degrees" << endl;
             connector.moveJointBy({ 0,0,0,0,0,10 });
             WaitFinish(connector);
@@ -117,22 +166,6 @@ public:
 
             connector.moveJointHome();
             WaitFinish(connector);
-    //        cout << "Move joints to the saved values" << endl;
-    //        connector.moveJointTo(q);
-    //        WaitFinish(connector);
-    //        IndyJointSubstitution(indyJointState, q, connector);
-    //        joint_state_pub.publish(indyJointState);
-
-    //        cout << "Move along waypoints" << endl;
-    //        connector.moveJointWaypointSet({
-    //                                               0, 0, 0, 0, 0, 0,
-    //                                               0, -15, -90, 0, -75, 0,
-    //                                               0, 0, 0, 0, 0, 0,
-    //                                               0, 15, 90, 0, 75, 0
-    //                                       });
-    //        WaitFinish(connector);
-    //        IndyJointSubstitution(indyJointState, q, connector);
-    //        joint_state_pub.publish(indyJointState);
 
             cout << "Current end-effector position:" << endl;
             double p[6];
@@ -171,10 +204,6 @@ public:
 
    
 
-private:
-    IndyDCPConnector connector;
-    ros::NodeHandle nh;
-    ros::Publisher joint_state_pub;
 
 };
 

@@ -74,6 +74,8 @@ int main(int argc, char **argv)
         ros::spinOnce();
 //        if(isCoffee)
 //        {
+          double temp;
+          cin >> temp;
           cout << "I has listened." << endl;
           robot_behavior_flow = go_to_goal_by_using_omron;
 //        }
@@ -93,13 +95,25 @@ int main(int argc, char **argv)
 
       case control_indy7_to_pick_up:
       {
-        cout << "control_indy7_to_pick_up" << endl;
-        std_srvs::SetBool srv;
-        srv.request.data = gotogoal2;
-        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
-          return 0;
-        cout << "srv.response.success : " << srv.response.success << endl;
-        break;
+//        ROS_INFO_STREAM("control indy7 to pick up");
+//        std_srvs::SetBool srv;
+//        srv.request.data = moveHome;
+//        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
+//          return 0;
+//        sleep(1);
+//
+//        ROS_INFO_STREAM("control indy7 to pick up");
+//        srv.request.data = moveZero;
+//        if(!Call_service_and_move_next_flow(service_omron_client, srv, go_to_home_by_using_omron))
+//          return 0;
+//        sleep(1);
+
+//        srv.request.data = getObjectPose;
+//        if(!Call_service_and_move_next_flow(service_omron_client, srv, go_to_home_by_using_omron))
+//          return 0;
+//        sleep(1);
+//
+//        break;
       }
 
       case check_to_pick_up_complete:
@@ -134,9 +148,13 @@ int main(int argc, char **argv)
 
       case go_to_home_by_using_omron:
       {
-//        cout << "I'm going home~ ^_^" << endl;
-//        robot_behavior_flow = hand_over_something;
-//        break;
+        cout << "control_indy7_to_pick_up" << endl;
+        std_srvs::SetBool srv;
+        srv.request.data = gotogoal2;
+        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
+          return 0;
+        cout << "srv.response.success : " << srv.response.success << endl;
+        break;
       }
 
       case hand_over_something:
