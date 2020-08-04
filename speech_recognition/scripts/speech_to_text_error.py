@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#-*- coding:utf-8 -*-
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -37,15 +37,39 @@
 ## Simple talker demo that published std_msgs/Strings messages
 ## to the 'chatter' topic
 
+
+
 import rospy
 import speech_recognition as sr
 
 from std_msgs.msg import String
+from std_msgs.msg import Int32MultiArray
+
+import sys
+
+import sys, select, termios, tty
+
+reload(sys)
+
+sys.setdefaultencoding('utf-8')
+
+def getKey():
+	tty.setraw(sys.stdin.fileno())
+	rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+	if rlist:
+		key = sys.stdin.read(1)
+	else:
+		key = ''
+
+	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+	return key
+
+
 
 def talker():
 
     # get audio from the microphone                                                                       
-    r = sr.Recognizer()        
+    r = sr.Recognizer()    
 
     pub = rospy.Publisher('dictation_text', String, queue_size=10)
     rospy.init_node('speech_to_text', anonymous=True)
@@ -53,18 +77,28 @@ def talker():
     r.dynamic_energy_threshold = False # asd
     while not rospy.is_shutdown():
 
+    	key = getKey()
+
         YouSaid = ""
         with sr.Microphone() as source:                                                                       
-            print("Speak:")  
+            print("Please speak")  
             try:
-                audio = r.listen(source, timeout=1)
-                # YouSaid = r.recognize_google(audio, language='ko-kr')
-                YouSaid = r.recognize_google(audio)
-                print("You said " + YouSaid)
-                print(type(YouSaid))
+            	if key == 't':
+            		num = 1
+            	else :
+            		num = 0
+
+            	if num == 1:
+	                audio = r.listen(source, timeout=1)
+	                YouSaid = r.recognize_google(audio, language='ko-kr')
+
+	                #YouSaid = r.recognize_google(audio)
+	                print("나 : " + YouSaid)
+                	#print(type(YouSaid))
             except sr.WaitTimeoutError:
-                print("listening timed out while waiting for phrase to start")
-                YouSaid = "listening timed out while waiting for phrase to start"
+                # print("listening timed out while waiting for phrase to start")
+                # YouSaid = "listening timed out while waiting for phrase to start"
+                continue
             except sr.UnknownValueError:
                 print("Could not understand audio")
             except sr.RequestError as e:
@@ -75,13 +109,15 @@ def talker():
 
         # hello_str = "hello world %s" % YouSaid
         #if YouSaid == "coffee":
-        YouSaid = "Please give me a cup of coffee."
-        rospy.loginfo(YouSaid)
+        # YouSaid = "Please give me a cup of coffee."
+        # rospy.loginfo(YouSaid)
         pub.publish(YouSaid)
         rate.sleep()
 
 if __name__ == '__main__':
     try:
+    	settings = termios.tcgetattr(sys.stdin)
+
         talker()
     except rospy.ROSInterruptException:
         pass
