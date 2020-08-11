@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   visualization_msgs
   std_srvs
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,7 +111,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES indy_dcp_client
-  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs std_srvs
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs std_srvs tf2 tf2_ros
 #  DEPENDS system_lib
 )
 

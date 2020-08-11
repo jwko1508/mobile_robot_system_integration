@@ -11,6 +11,8 @@
 #include "sensor_msgs/JointState.h"
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
+#include "std_msgs/Float64MultiArray.h"
+#include "tf2/LinearMath/Matrix3x3.h"
 
 //#include "geometry_msgs"
 
@@ -25,42 +27,71 @@ private:
     IndyDCPConnector connector;
     ros::NodeHandle nh;
     ros::Publisher joint_state_pub;
+    ros::Subscriber marker_pose_sub;
     ros::ServiceServer server_indy7;
 
     unsigned char m_Command;
 
+    std_msgs::Float64MultiArray HomogeneousTransformationMatrix;
+
     ros::Rate rate100;
+
+    sensor_msgs::JointState indyJointState;
     
 public:
     Indy7DCPClient(string robotIP) : connector(robotIP, ROBOT_INDY7),
                                      joint_state_pub(nh.advertise<sensor_msgs::JointState>("joint_states", 10)),
+                                     marker_pose_sub(nh.subscribe("MarkerHomogeneousMatrix", 10, &Indy7DCPClient::MarkerPoseCB, this)),
+                                     server_indy7(nh.advertiseService("control_indy7", &Indy7DCPClient::IndyServerCB, this)),
                                      m_Command(0),
                                      rate100(100)
     {
         ROS_INFO_STREAM("INDY7DCP Client init!");
         cout << "Connecting to the robot" << endl;
         connector.connect();
-        server_indy7 = nh.advertiseService("control_indy", &Indy7DCPClient::IndyServerCB, this);
-    }
-    ~Indy7DCPClient()
-    {
 
+        int jointLevel = 1;
+        cout << "Set the limit level(" << jointLevel <<
+                ") of velocity/acceleration of JointMove" << endl;
+        connector.setJointBoundaryLevel(jointLevel);
+
+        int taskLevel = 1;
+        cout << "Set the limit level(" << taskLevel <<
+            ") of velocity/acceleration of taskMove" << endl;
+        connector.setTaskBoundaryLevel(taskLevel);
+
+        // declare indy Joint State
+        std::vector<string> name_of_joints;
+        for (int i = 0; i < 6; ++i) {
+            string name = "joint" + to_string(i);
+            name_of_joints.push_back(name);
+        }
+        indyJointState.header.frame_id = ROBOT_INDY7;
+        indyJointState.name = name_of_joints;
+
+        HomogeneousTransformationMatrix.data.reserve(16);
+        for (size_t i = 0; i < 16; i++)
+        {
+            HomogeneousTransformationMatrix.data.push_back(0);
+        }
+    }
+    
+    void MarkerPoseCB(const std_msgs::Float64MultiArray::ConstPtr& msg)
+    {
+        HomogeneousTransformationMatrix = *msg;
     }
 
     bool IndyServerCB(std_srvs::SetBool::Request  &req,
                         std_srvs::SetBool::Response &res)
     {
-        
-         switch (req.data)
+        switch (req.data)
         {
             case moveHome:
             {
                 ROS_INFO("I'm moving home.");
-                res.message = "I moved home.";
-                cout << "Go to home position" << endl;
                 connector.moveJointHome();
                 WaitFinish(connector);
-
+                res.message = "I moved home position.";
                 res.success = true;
                 return true;
 
@@ -69,14 +100,31 @@ public:
             case moveZero:
             {
                 ROS_INFO("I'm moving zero positon.");
-                res.message = "I moved zero positon.";
-                cout << "Go to zero position" << endl;
                 connector.moveJointZero();
                 WaitFinish(connector);
-
+                res.message = "I moved zero positon.";
                 res.success = true;
                 return true;
                 
+                break;
+            }
+            case Move5cmUpInMarkerPose:
+            {
+                ROS_INFO("Indy7 is moving up 5cm in marker pose.");
+                tf2::Matrix3x3 rotationMatrix;
+                rotationMatrix.setValue(HomogeneousTransformationMatrix.data.at(0), HomogeneousTransformationMatrix.data.at(1), HomogeneousTransformationMatrix.data.at(2),
+                                        HomogeneousTransformationMatrix.data.at(4), HomogeneousTransformationMatrix.data.at(5), HomogeneousTransformationMatrix.data.at(6), 
+                                        HomogeneousTransformationMatrix.data.at(8), HomogeneousTransformationMatrix.data.at(9), HomogeneousTransformationMatrix.data.at(10));
+                double roll, pitch, yaw;
+                rotationMatrix.getRPY(roll,pitch,yaw);
+
+                cout << __LINE__ << " x : " << HomogeneousTransformationMatrix.data.at(3) << endl;
+                cout << __LINE__ << " y : " << HomogeneousTransformationMatrix.data.at(7) << endl;
+                cout << __LINE__ << " z : " << HomogeneousTransformationMatrix.data.at(11) << endl;
+                cout << __LINE__ << " roll : " << roll << endl;
+                cout << __LINE__ << " pitch : " << pitch << endl;
+                cout << __LINE__ << " yaw : " << yaw << endl;
+
                 break;
             }
             default:
@@ -91,33 +139,23 @@ public:
         bool fin = false;
         do {
         #if defined (LINUX)
-                sleep(0.5);
+                sleep(0.25);
         #elif defined(WINDOWS)
-                Sleep(500);
+                Sleep(250);
         #endif
         connector.isMoveFinished(fin); // check if motion finished
         } while (!fin);
     }
 
-    void PublishCurrentJointState(double loopRate)
+    void PublishCurrentJointState()
     {
-        ros::Rate loop_rate(loopRate);
-        sensor_msgs::JointState indyJointState;
-        
-        std::vector<string> name_of_joints;
-        for (int i = 0; i < 6; ++i) {
-            string name = "joint" + to_string(i);
-            name_of_joints.push_back(name);
-        }
-
-        indyJointState.header.frame_id = ROBOT_INDY7;
-        indyJointState.name = name_of_joints;
-
+        // ros::Rate loop_rate = std::move(loopRate);
+       
         bool ready;
-        while (ros::ok())
+        connector.isRobotReady(ready); 
+        if(ready)
         {
-            connector.isRobotReady(ready); // 집에서 이거 추가했었음 반복문 안에 ready 넣는거
-            if(ready)
+            while (ros::ok())
             {
                 double q[6];
                 connector.getJointPosition(q);
@@ -125,14 +163,15 @@ public:
                 std::vector<double> q_vec;
                 for (size_t i = 0; i < 6; i++)
                 {
-                    q_vec.push_back(q[i]);
+                    q_vec.push_back(M_PI / 180 * q[i]);
                 }
                 indyJointState.position = q_vec;
                 indyJointState.header.stamp = ros::Time::now();
                 joint_state_pub.publish(indyJointState);
-                loop_rate.sleep();
+                // loop_rate.sleep();
             }
         }
+        
     }
 
     void doTask()
@@ -199,12 +238,15 @@ public:
 
     void RunThread()
     {
-        boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, this, 100));
+        boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, this));
     }
 
-   
-
-
+    void EmergencyStop()
+    {
+        double temp;
+        cin >> temp;
+        connector.stopEmergency();
+    }
 };
 
 
@@ -215,11 +257,13 @@ int main(int argc, char* argv[]) {
     Indy7DCPClient indy7DCPClient("192.168.0.129");
 
     // auto f1 = std::async(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient, 100);
-    boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient, 100));
+    // boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient, 100));
+    boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient));
+    boost::thread thread_c(boost::bind(&Indy7DCPClient::EmergencyStop, &indy7DCPClient));
     // indy7DCPClient.RunThread();
 
-    indy7DCPClient.doTask();
-
+    // indy7DCPClient.doTask();
+    ros::spin();
     // f1.get();
     
 }
