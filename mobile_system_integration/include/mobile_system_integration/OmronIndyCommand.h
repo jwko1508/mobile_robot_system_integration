@@ -23,6 +23,8 @@ enum Indy_command
 {
   moveHome = 100,
   moveZero,
+  getMarkerPose,
+  Move5cmUpInMarkerPose,
   getObjectPose,
   indy_success,
   indy_fail

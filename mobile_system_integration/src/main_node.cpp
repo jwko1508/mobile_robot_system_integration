@@ -63,6 +63,7 @@ int main(int argc, char **argv)
 
   ros::ServiceClient service_omron_client = n.serviceClient<std_srvs::SetBool>("control_omron");
   ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<std_srvs::SetBool>("control_indy7");
+  ros::ServiceClient get_marker_pose_by_using_indyeye = n.serviceClient<std_srvs::SetBool>("getMarkerPose");
 
   while(ros::ok())
   {
@@ -77,43 +78,57 @@ int main(int argc, char **argv)
           double temp;
           cin >> temp;
           cout << "I has listened." << endl;
-          robot_behavior_flow = go_to_goal_by_using_omron;
+          robot_behavior_flow = control_indy7_to_pick_up;
 //        }
         break;
       }
 
       case go_to_goal_by_using_omron:
       {
-        cout << "go_to_goal_by_using_omron" << endl;
-        std_srvs::SetBool srv;
-        srv.request.data = gotogoal1;
-        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
-          return 0;
-        sleep(1);
-        break;
+        // cout << "go_to_goal_by_using_omron" << endl;
+        // std_srvs::SetBool srv;
+        // srv.request.data = gotogoal1;
+        // if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
+        //   return 0;
+        // sleep(1);
+        // break;
       }
 
       case control_indy7_to_pick_up:
       {
-//        ROS_INFO_STREAM("control indy7 to pick up");
-//        std_srvs::SetBool srv;
-//        srv.request.data = moveHome;
-//        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
-//          return 0;
-//        sleep(1);
-//
-//        ROS_INFO_STREAM("control indy7 to pick up");
-//        srv.request.data = moveZero;
-//        if(!Call_service_and_move_next_flow(service_omron_client, srv, go_to_home_by_using_omron))
-//          return 0;
-//        sleep(1);
+        ROS_INFO_STREAM("control indy7 to move home position");
+        std_srvs::SetBool srv;
+        // srv.request.data = moveHome;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, control_indy7_to_pick_up))
+        //   return 0;
+        // sleep(1);
 
-//        srv.request.data = getObjectPose;
-//        if(!Call_service_and_move_next_flow(service_omron_client, srv, go_to_home_by_using_omron))
-//          return 0;
-//        sleep(1);
-//
-//        break;
+        ROS_INFO_STREAM("control indyeye to get object pose data.");
+        srv.request.data = getObjectPose;
+        if(Call_service_and_move_next_flow(get_marker_pose_by_using_indyeye, srv, listening))
+        {
+          // pass
+        }
+        else // when failed to get a marker pose.
+        {
+          robot_behavior_flow = listening;
+          continue;
+        }
+        sleep(1);
+
+        // ROS_INFO_STREAM("control indy7 to move 5cm up from marker position");
+        // srv.request.data = Move5cmUpInMarkerPose;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, listening))
+        //   return 0;
+        // sleep(1);
+
+        // ROS_INFO_STREAM("control indy7 to move zero position");
+        // srv.request.data = moveZero;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, listening))
+        //   return 0;
+        // sleep(1);
+
+        break;
       }
 
       case check_to_pick_up_complete:
@@ -146,16 +161,16 @@ int main(int argc, char **argv)
 //        break;
       }
 
-      case go_to_home_by_using_omron:
-      {
-        cout << "control_indy7_to_pick_up" << endl;
-        std_srvs::SetBool srv;
-        srv.request.data = gotogoal2;
-        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
-          return 0;
-        cout << "srv.response.success : " << srv.response.success << endl;
-        break;
-      }
+      // case go_to_home_by_using_omron:
+      // {
+      //   cout << "control_indy7_to_pick_up" << endl;
+      //   std_srvs::SetBool srv;
+      //   srv.request.data = gotogoal2;
+      //   if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
+      //     return 0;
+      //   cout << "srv.response.success : " << srv.response.success << endl;
+      //   break;
+      // }
 
       case hand_over_something:
       {
