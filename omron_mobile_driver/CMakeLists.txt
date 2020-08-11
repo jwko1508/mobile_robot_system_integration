@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_srvs
   geometry_msgs
   visualization_msgs
+  nav_msgs
   tf2
   tf2_ros
 )

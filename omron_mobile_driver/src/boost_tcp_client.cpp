@@ -4,6 +4,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
+#include "nav_msgs/Odometry.h"
 #include "mobile_system_integration/OmronIndyCommand.h"
 
 #include "limits.h"
@@ -202,6 +203,7 @@ void do_stuff(int* publish_rate)
   ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
 
   ros::Publisher vis_pub = node->advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
+  ros::Publisher odom_pub = node->advertise<nav_msgs::Odometry>("odom_topic", 1 );
 
 
 //    double past = ros::Time::now().toSec();
@@ -291,6 +293,21 @@ void do_stuff(int* publish_rate)
 
     br.sendTransform(transformStamped);
 
+    nav_msgs::Odometry odom;
+    odom.header.frame_id = "ground";
+    odom.header.stamp = ros::Time::now();
+    odom.child_frame_id = "omron_mobile";
+    odom.pose.pose.position.x = 0.001 * omron_state.location.x;
+    odom.pose.pose.position.y = 0.001 * omron_state.location.y;
+    odom.pose.pose.position.z = 0;
+
+    odom.pose.pose.orientation.x = q.x();
+    odom.pose.pose.orientation.y = q.y();
+    odom.pose.pose.orientation.z = q.z();
+    odom.pose.pose.orientation.w = q.w();
+
+    odom_pub.publish(odom);
+  
 
     // marker for visualization.
     visualization_msgs::Marker marker;
