@@ -6,8 +6,17 @@ import rospy
 import pickle
 import requests
 import numpy as np
+from inspect import currentframe, getframeinfo
 from std_msgs.msg import Float64MultiArray
 from std_srvs.srv import SetBool,SetBoolRequest,SetBoolResponse
+
+def GetLineNum():
+    """
+    이 함수를 호출한 곳의 라인번호를 리턴한다.\n
+    출처: https://technote.luminance.kr/entry/python-디버그-line-번호-찍기 [루미넌스 - TechNote]
+    """
+    return inspect.getlineno(inspect.getouterframes(inspect.currentframe())[-1][0])
+
 
 class GetMarkerPose:
     def __init__(self):
