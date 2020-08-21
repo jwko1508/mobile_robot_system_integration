@@ -167,3 +167,9 @@ add_dependencies(practice_custom_msg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 음성인식을 눌러서 말하기 방식을 제거함.
 "하이 피터팬"을 말하면, 네 주인님 응답하고 주인의 명령을 듣는 방식으로 변경하기로 결정함.
 음성인식 노드와 behavior 선택 노드 연결을 위해 코드[(링크)](https://github.com/hjw1399/mobile_robot_system_integration/tree/develop/mobile_system_integration)를 정우에게 설명함. 
+
+# 2020-08-21
+## author : jwko1508
+#### tingkerbell 구현
+눌러서 말하기를 하지 않고 "팅커벨"이라고하면 응답함. 저번 회의에서는 "피터팬"이라고 했지만 "팅커벨"로 하여서 바꿀 예정
+또한 음성인식이 잘안되고 반복문으로 돌던 오류 해결. 명령어를 미리 정하여 응답 메시지와 명령번호 정할 예정
