@@ -166,6 +166,7 @@ include_directories(
 install(PROGRAMS 
   scripts/speech_to_text.py
   scripts/speech_to_text_error.py
+  scripts/speech_to_text_timgkerbell.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
