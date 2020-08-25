@@ -42,6 +42,11 @@
 import rospy
 import speech_recognition as sr
 import time
+import os
+import subprocess
+
+from gtts import gTTS
+from io import BytesIO
 
 from std_msgs.msg import String
 from std_msgs.msg import Int32MultiArray
@@ -53,6 +58,12 @@ import sys, select, termios, tty
 reload(sys)
 
 sys.setdefaultencoding('utf-8')
+
+cmdlists = [
+			["안녕","무슨일인가?",9],
+			["종료","퇴근이다",0],
+			["멈춰","멈추겠다",8],
+			["가라","이동한다",2]]
 
 def getKey():
 	tty.setraw(sys.stdin.fileno())
@@ -72,14 +83,21 @@ def talker():
     # get audio from the microphone                                                                       
     r = sr.Recognizer()    
 
+    key = getKey()
+    blank = 1
+    num = 0
+
     pub = rospy.Publisher('dictation_text', String, queue_size=10)
     rospy.init_node('speech_to_text', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     r.dynamic_energy_threshold = False # asd
-    while not rospy.is_shutdown():
 
-    	key = getKey()
-    	blank = 1
+
+    engine = pyttsx3.init() 
+    voices = engine.getProperty('voices')
+    engine.setProperty('voices', voices[1].id) # 여성
+
+    while not rospy.is_shutdown():
 
         YouSaid = ""
         with sr.Microphone() as source:                                                                       
@@ -87,41 +105,80 @@ def talker():
         	#print(type(YouSaid))
             try:
 
-            	print("Please speak")  
-            	audio1 = r.listen(source, timeout=1,phrase_time_limit=3)
-            	YouSaid1 = r.recognize_google(audio1, language='ko-kr')
-            	#YouSaid = r.recognize_google(audio)
-            	print("나 : " + YouSaid1)
-
-            	if YouSaid1.find("팅커벨") != -1 :
-
-            		num = 1
-
-            		print("옴론 : " + "말씀하라. 주인.")
-            		before = time.time()
-
-
-            	# if key == 't':
-            	# 	num = 1
-            	else :
-            		num = 0
-            		print("옴론 : " + "명령하고싶으면 암호를 말하라.")
-
             	if num == 1:
             		
             		blank = 0
 
-            		audio2 = r.listen(source, timeout=1,phrase_time_limit=5)
-            		YouSaid2 = r.recognize_google(audio2, language='ko-kr')
+            		print("speak command")
+            		audio = r.listen(source, timeout=1,phrase_time_limit=5)
+            		YouSaid = r.recognize_google(audio, language='ko-kr')
 
-            		print("나 : " + YouSaid2)
-            		print(audio2.sample_segment)
+            		for cmd in range(len(cmdlists)) :
 
-            		blank = YouSaid2
+            			if YouSaid == cmdlists[cmd][0]:
 
-            		YouSaid2 = ""
+            				print("나 : " + YouSaid)
+            				print("옴론 : " + cmdlists[cmd][1])
+            				tts_cmd = gTTS(text=cmdlists[cmd][1], lang='ko')
+            				tts_cmd.save("%s.mp3" % cmdlists[cmd][1])
+            				os.system("mpg123 -q %s.mp3" % cmdlists[cmd][1])
+            				os.remove("%s.mp3" % cmdlists[cmd][1])
+            				# engine.say(cmdlists[cmd][1]) 
+            				# engine.runAndWait() 
+            				cmdnum = cmdlists[cmd][2]
+            				YouSaid = ""
+            				num = 0
 
-            		num = 0
+            				pub.publish(cmdnum)
+
+            	if num == 0 :
+
+            		blank = 1
+
+            		print("Please speak")  
+            		audio = r.listen(source, timeout=1,phrase_time_limit=3)
+            		YouSaid = r.recognize_google(audio, language='ko-kr')
+            		#YouSaid = r.recognize_google(audio)
+            		print("나 : " + YouSaid)
+
+
+            	if YouSaid.find("피터팬") != -1 :
+
+            		blank = 1
+
+            		num = 1
+            		print("옴론 : " + "말씀해주세요. 주인님.")
+            		# engine.setProperty('voice')
+            		# engine.say("말씀하라. 주인.") 
+            		# engine.runAndWait() 
+            		tts = gTTS(text="말씀해주세요. 주인님.", lang='ko')
+            		tts.save("호출.mp3")
+            		os.system("mpg123 -q 호출.mp3")
+
+            		# opener ="open" if sys.platform == "darwin" else "xdg-open"
+            		# subprocess.call([opener, "호출.mp3"])
+            		# print("Speaking.....")
+            		# time.sleep(1)
+            		# os.remove("호출.mp3")
+            		# time.sleep(4)
+
+            	# if key == 't':
+            	# 	num = 1
+            	# else :
+            	# 	num = 0
+            	# 	print("옴론 : " + "명령하고싶으면 암호를 말하라.")
+
+            	
+
+
+
+            		# print("나 : " + YouSaid2)
+
+            		# blank = YouSaid2
+
+            		# YouSaid2 = ""
+
+            		# num = 0
 
                 #YouSaid = r.recognize_google(audio)
                 #print(type(YouSaid))
@@ -134,6 +191,12 @@ def talker():
 
             	if blank != 1:
                 	print("옴론 : " + "명령안할거면 부르지마라.")
+                	tts = gTTS(text="명령안할거면 부르지마라.", lang='ko')
+                	tts.save("시간초과.mp3")
+                	os.system("mpg123 -q 시간초과.mp3")
+                	before = time.time()
+
+                	num = 0
 
                 	blank = 1
 
@@ -148,7 +211,6 @@ def talker():
         #if YouSaid == "coffee":
         # YouSaid = "Please give me a cup of coffee."
         # rospy.loginfo(YouSaid)
-        pub.publish(YouSaid)
         rate.sleep()
 
 if __name__ == '__main__':
