@@ -173,3 +173,14 @@ add_dependencies(practice_custom_msg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 #### tingkerbell 구현
 눌러서 말하기를 하지 않고 "팅커벨"이라고하면 응답함. 저번 회의에서는 "피터팬"이라고 했지만 "팅커벨"로 하여서 바꿀 예정
 또한 음성인식이 잘안되고 반복문으로 돌던 오류 해결. 명령어를 미리 정하여 응답 메시지와 명령번호 정할 예정
+
+# 2020-08-24
+## author : jwko1508
+#### tts 추가 및 명령어 추가
+```markdown
+pip install gtts
+```
+```markdown
+sudo apt install mpg123
+```
+선행 패키지인 gtts와 mp3를 명령창에서 실행할수있게해주는 mpg123을 설치한다
