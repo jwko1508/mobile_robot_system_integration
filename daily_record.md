@@ -189,4 +189,6 @@ sudo apt install mpg123
 
 각종 오류 수정
 
-rosservice로 바꿀  
+rosservice로 바꿀 예정
+
+tts 추가
