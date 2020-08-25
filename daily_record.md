@@ -184,3 +184,9 @@ pip install gtts
 sudo apt install mpg123
 ```
 선행 패키지인 gtts와 mp3를 명령창에서 실행할수있게해주는 mpg123을 설치한다
+
+팅커벨 -> 피터팬으로 변경
+
+각종 오류 수정
+
+rosservice로 바꿀  
