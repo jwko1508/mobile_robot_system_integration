@@ -7,6 +7,9 @@
 
 #include <cstdlib>
 
+#define sleepTime 0.5
+#define maxIterationNumber 1
+
 bool emergency_state = false;
 bool isCoffee = false;
 bool isDetectComplete = false;
@@ -64,7 +67,7 @@ int main(int argc, char **argv)
   ros::ServiceClient service_omron_client = n.serviceClient<std_srvs::SetBool>("control_omron");
   ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<std_srvs::SetBool>("control_indy7");
   ros::ServiceClient get_marker_pose_by_using_indyeye = n.serviceClient<std_srvs::SetBool>("getMarkerPose");
-
+  unsigned int repeatitionNum(INT32_MAX);
   while(ros::ok())
   {
     switch (robot_behavior_flow)
@@ -75,52 +78,78 @@ int main(int argc, char **argv)
         ros::spinOnce();
 //        if(isCoffee)
 //        {
-          double temp;
-          cin >> temp;
-          cout << "I has listened." << endl;
-          robot_behavior_flow = control_indy7_to_pick_up;
+          
+          // int i(0);
+          if(repeatitionNum < maxIterationNumber)
+          {
+            cout << "I has listened." << endl;
+            cout << "repeatitionNum : " << repeatitionNum << endl;
+            robot_behavior_flow = go_to_goal_by_using_omron;
+            repeatitionNum++;
+          }
+          else
+          {
+            double temp;
+            cin >> temp;
+            robot_behavior_flow = listening;
+            repeatitionNum = 0;
+          }
+          
 //        }
         break;
       }
 
       case go_to_goal_by_using_omron:
       {
-        // cout << "go_to_goal_by_using_omron" << endl;
-        // std_srvs::SetBool srv;
-        // srv.request.data = gotogoal1;
-        // if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
+        std_srvs::SetBool srv;
+
+        ROS_INFO_STREAM("control indy7 to move home position");
+        srv.request.data = moveHome;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+          return 0;
+        sleep(sleepTime);
+        // ROS_INFO_STREAM("control indy7 to move organization position");
+        // srv.request.data = moveOrganazation;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_goal_by_using_omron))
         //   return 0;
         // sleep(1);
-        // break;
+
+        cout << "go_to_goal_by_using_omron" << endl;
+        srv.request.data = gotogoal2;
+        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
+          return 0;
+        sleep(sleepTime);
+        break;
       }
 
       case control_indy7_to_pick_up:
       {
-        ROS_INFO_STREAM("control indy7 to move home position");
         std_srvs::SetBool srv;
-        // srv.request.data = moveHome;
-        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, control_indy7_to_pick_up))
-        //   return 0;
+
+        ROS_INFO_STREAM("control indy7 to move home position");
+        srv.request.data = moveHome;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, control_indy7_to_pick_up))
+          return 0;
+        sleep(sleepTime);
+
+        // ROS_INFO_STREAM("control indyeye to get object pose data.");
+        // srv.request.data = getObjectPose;
+        // if(Call_service_and_move_next_flow(get_marker_pose_by_using_indyeye, srv, listening))
+        // {
+        //   // pass
+        // }
+        // else // when failed to get a marker pose.
+        // {
+        //   robot_behavior_flow = listening;
+        //   continue;
+        // }
         // sleep(1);
 
-        ROS_INFO_STREAM("control indyeye to get object pose data.");
-        srv.request.data = getObjectPose;
-        if(Call_service_and_move_next_flow(get_marker_pose_by_using_indyeye, srv, listening))
-        {
-          // pass
-        }
-        else // when failed to get a marker pose.
-        {
-          robot_behavior_flow = listening;
-          continue;
-        }
-        sleep(1);
-
-        // ROS_INFO_STREAM("control indy7 to move 5cm up from marker position");
-        // srv.request.data = Move5cmUpInMarkerPose;
-        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, listening))
-        //   return 0;
-        // sleep(1);
+        ROS_INFO_STREAM("control indy7 to move 5cm up from marker position");
+        srv.request.data = drawLine;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+          return 0;
+        sleep(sleepTime);
 
         // ROS_INFO_STREAM("control indy7 to move zero position");
         // srv.request.data = moveZero;
@@ -161,16 +190,29 @@ int main(int argc, char **argv)
 //        break;
       }
 
-      // case go_to_home_by_using_omron:
-      // {
-      //   cout << "control_indy7_to_pick_up" << endl;
-      //   std_srvs::SetBool srv;
-      //   srv.request.data = gotogoal2;
-      //   if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
-      //     return 0;
-      //   cout << "srv.response.success : " << srv.response.success << endl;
-      //   break;
-      // }
+      case go_to_home_by_using_omron:
+      {
+        std_srvs::SetBool srv;
+        ROS_INFO_STREAM("control indy7 to move home position");
+        srv.request.data = moveHome;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+          return 0;
+        sleep(sleepTime);
+
+        // ROS_INFO_STREAM("control indy7 to move organization position");
+        // srv.request.data = moveOrganazation;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+        //   return 0;
+        // sleep(1);
+
+        cout << "goto goal1" << endl;
+        srv.request.data = gotogoal1;
+        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
+          return 0;
+        cout << "srv.response.success : " << srv.response.success << endl;
+        sleep(sleepTime);
+        break;
+      }
 
       case hand_over_something:
       {

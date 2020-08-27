@@ -108,6 +108,40 @@ public:
                 
                 break;
             }
+            case moveOrganazation:
+            {
+                ROS_INFO("I'm moving organazation positon.");
+                double q[6] = {0, -120, 150, 0, -150, 0};
+                connector.moveJointTo(q);
+                WaitFinish(connector);
+                res.message = "I moved organazation positon.";
+                res.success = true;
+                return true;
+                
+                break;
+
+            }
+            case drawLine:
+            {
+                ROS_INFO("I'm drawing the line.");
+                // connector.moveTaskWaypointSet({
+                //             -559.51, -168.52, 110, 0, 180, 0,
+                //             -650, -168.52, 110, 0, 180, 0
+                //             });
+                
+                connector.moveTaskTo({-0.580, -0.145, 0.086, 0, 180, 0});
+                WaitFinish(connector);
+                // connector.moveTaskTo({-0.55951, -0.16852, 0.087, 0, 180, 0});
+                // WaitFinish(connector);
+                
+                res.message = "I drew the line.";
+                res.success = true;
+                return true;
+                
+                break;
+
+            }
+
             case Move5cmUpInMarkerPose:
             {
                 ROS_INFO("Indy7 is moving up 5cm in marker pose.");
@@ -180,59 +214,63 @@ public:
         connector.isRobotReady(ready);
         
         if (ready) {
-            cout << "Robot is ready" << endl;
+            // cout << "Robot is ready" << endl;
 
-            int jointLevel = 1;
-            cout << "Set the limit level(" << jointLevel <<
-                    ") of velocity/acceleration of JointMove" << endl;
-            connector.setJointBoundaryLevel(jointLevel);
+            // int jointLevel = 1;
+            // cout << "Set the limit level(" << jointLevel <<
+            //         ") of velocity/acceleration of JointMove" << endl;
+            // connector.setJointBoundaryLevel(jointLevel);
 
-            int taskLevel = 1;
-            cout << "Set the limit level(" << taskLevel <<
-                ") of velocity/acceleration of JointMove" << endl;
-            connector.setTaskBoundaryLevel(taskLevel);
+            // int taskLevel = 1;
+            // cout << "Set the limit level(" << taskLevel <<
+            //     ") of velocity/acceleration of JointMove" << endl;
+            // connector.setTaskBoundaryLevel(taskLevel);
 
-            cout << "Go to home position" << endl;
-            connector.moveJointHome();
-            WaitFinish(connector);
+            // cout << "Go to home position" << endl;
+            // connector.moveJointHome();
+            // WaitFinish(connector);
 
-            cout << "Rotate last joint by 10 degrees" << endl;
-            connector.moveJointBy({ 0,0,0,0,0,10 });
-            WaitFinish(connector);
+            // cout << "Rotate last joint by 10 degrees" << endl;
+            // connector.moveJointBy({ 0,0,0,0,0,10 });
+            // WaitFinish(connector);
 
-            connector.moveJointZero();
-            WaitFinish(connector);
+            // connector.moveJointZero();
+            // WaitFinish(connector);
 
-            connector.moveJointHome();
-            WaitFinish(connector);
+            // connector.moveJointHome();
+            // WaitFinish(connector);
 
-            cout << "Current end-effector position:" << endl;
+            // cout << "Current end-effector position:" << endl;
+            // double p[6];
+            // connector.getTaskPosition(p);
+            // for (int i = 0; i < 6; i++) { cout << p[i] << ","; }
+            // cout << endl;
+
+            // cout << "Move end-effector upward by 5 cm" << endl;
+            // connector.moveTaskBy({ 0,0,0.05,0,0,0 });
+            // WaitFinish(connector);
+
+            // cout << "Move end-effector to saved position" << endl;
+            // connector.moveTaskTo(p);
+            // WaitFinish(connector);
+
+            // char ret;
+            // cout << "Read DI 20: " << endl;
+            // connector.getSmartDigitalInput(20, ret);
+            // cout <<  ret << endl;
+
+            // cout << "Write DO 4 as HIGH";
+            // connector.setSmartDigitalOutput(4, 1);
+
+            // connector.moveJointZero();
+            // WaitFinish(connector);
+
+            // cout << "Disconnecting robot" << endl;
+            // connector.disconnect();
             double p[6];
             connector.getTaskPosition(p);
             for (int i = 0; i < 6; i++) { cout << p[i] << ","; }
             cout << endl;
-
-            cout << "Move end-effector upward by 5 cm" << endl;
-            connector.moveTaskBy({ 0,0,0.05,0,0,0 });
-            WaitFinish(connector);
-
-            cout << "Move end-effector to saved position" << endl;
-            connector.moveTaskTo(p);
-            WaitFinish(connector);
-
-            char ret;
-            cout << "Read DI 20: " << endl;
-            connector.getSmartDigitalInput(20, ret);
-            cout <<  ret << endl;
-
-            cout << "Write DO 4 as HIGH";
-            connector.setSmartDigitalOutput(4, 1);
-
-            connector.moveJointZero();
-            WaitFinish(connector);
-
-            cout << "Disconnecting robot" << endl;
-            connector.disconnect();
         }
     }
 
@@ -254,8 +292,8 @@ public:
 int main(int argc, char* argv[]) {
     ros::init(argc, argv, "indy_dcp_test");
     
-    Indy7DCPClient indy7DCPClient("192.168.0.129");
-
+    Indy7DCPClient indy7DCPClient("192.168.1.45");
+    // indy7DCPClient.doTask();
     // auto f1 = std::async(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient, 100);
     // boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient, 100));
     boost::thread thread_b(boost::bind(&Indy7DCPClient::PublishCurrentJointState, &indy7DCPClient));

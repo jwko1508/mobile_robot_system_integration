@@ -42,7 +42,7 @@ struct Omron_State
 #define SA struct sockaddr
 #define TRUE 1
 #define FALSE 0
-#define address "192.168.0.102"
+#define address "192.168.1.49"
 
 Omron_State omron_state;
 unsigned char g_Command = 0;
