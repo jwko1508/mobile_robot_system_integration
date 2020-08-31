@@ -197,4 +197,4 @@ tts 추가
 ## author : jwko1508
 #### 오류 발생
 커스텀 메시지 만들고 서비스 통신 시도해보다가 오류 발생
-기존의 recognizer가 
+기존의 recognizer가 잘안됨
