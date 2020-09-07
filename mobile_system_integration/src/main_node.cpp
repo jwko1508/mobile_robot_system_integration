@@ -4,6 +4,7 @@
 #include "std_msgs/String.h"
 #include "darknet_ros_msgs/ObjectCount.h"
 #include "mobile_system_integration/OmronIndyCommand.h"
+#include "command_srvs/SetCommand.h"
 
 #include <cstdlib>
 
@@ -37,7 +38,7 @@ void darknet_cb(const darknet_ros_msgs::ObjectCount& msg)
 }
 
 bool Call_service_and_move_next_flow(ros::ServiceClient& srv_client,
-                      std_srvs::SetBool& srv,
+                      command_srvs::SetCommand& srv,
                       int flow_after_successive_call)
 {
   if(srv_client.call(srv))
@@ -64,12 +65,13 @@ int main(int argc, char **argv)
   ros::Subscriber speech_sub = n.subscribe("dictation_text", 10, speech_cb);
   ros::Subscriber darknet_sub = n.subscribe("/darknet_ros/found_object", 10, darknet_cb);
 
-  ros::ServiceClient service_omron_client = n.serviceClient<std_srvs::SetBool>("control_omron");
-  ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<std_srvs::SetBool>("control_indy7");
-  ros::ServiceClient get_marker_pose_by_using_indyeye = n.serviceClient<std_srvs::SetBool>("getMarkerPose");
+  ros::ServiceClient service_omron_client = n.serviceClient<command_srvs::SetCommand>("control_omron");
+  ros::ServiceClient control_indy7_to_pick_up_cl = n.serviceClient<command_srvs::SetCommand>("control_indy7");
+  ros::ServiceClient get_marker_pose_by_using_indyeye = n.serviceClient<command_srvs::SetCommand>("getMarkerPose");
   unsigned int repeatitionNum(INT32_MAX);
   while(ros::ok())
   {
+    command_srvs::SetCommand srv;
     switch (robot_behavior_flow)
     {
       case listening:
@@ -101,11 +103,11 @@ int main(int argc, char **argv)
 
       case go_to_goal_by_using_omron:
       {
-        std_srvs::SetBool srv;
+        // std_srvs::SetBool srv;
 
         ROS_INFO_STREAM("control indy7 to move home position");
-        srv.request.data = moveHome;
-        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+        srv.request.command = moveOrganazation;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, control_indy7_to_pick_up))
           return 0;
         sleep(sleepTime);
         // ROS_INFO_STREAM("control indy7 to move organization position");
@@ -114,21 +116,27 @@ int main(int argc, char **argv)
         //   return 0;
         // sleep(1);
 
-        cout << "go_to_goal_by_using_omron" << endl;
-        srv.request.data = gotogoal2;
-        if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
-          return 0;
-        sleep(sleepTime);
-        break;
+        // cout << "go_to_goal_by_using_omron" << endl;
+        // srv.request.command = gotogoal2;
+        // if(!Call_service_and_move_next_flow(service_omron_client, srv, control_indy7_to_pick_up))
+        //   return 0;
+        // sleep(sleepTime);
+        // break;
       }
 
       case control_indy7_to_pick_up:
       {
-        std_srvs::SetBool srv;
+        // std_srvs::SetBool srv;
 
-        ROS_INFO_STREAM("control indy7 to move home position");
-        srv.request.data = moveHome;
-        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, control_indy7_to_pick_up))
+        // ROS_INFO_STREAM("control indy7 to move home position");
+        // srv.request.command = moveZero;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, listening))
+        //   return 0;
+        // sleep(sleepTime);
+
+        ROS_INFO_STREAM("control indy7 to move organazation position");
+        srv.request.command = getObject;
+        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, listening))
           return 0;
         sleep(sleepTime);
 
@@ -145,11 +153,11 @@ int main(int argc, char **argv)
         // }
         // sleep(1);
 
-        ROS_INFO_STREAM("control indy7 to move 5cm up from marker position");
-        srv.request.data = drawLine;
-        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
-          return 0;
-        sleep(sleepTime);
+        // ROS_INFO_STREAM("control indy7 to move 5cm up from marker position");
+        // srv.request.command = drawLine;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+        //   return 0;
+        // sleep(sleepTime);
 
         // ROS_INFO_STREAM("control indy7 to move zero position");
         // srv.request.data = moveZero;
@@ -192,12 +200,12 @@ int main(int argc, char **argv)
 
       case go_to_home_by_using_omron:
       {
-        std_srvs::SetBool srv;
-        ROS_INFO_STREAM("control indy7 to move home position");
-        srv.request.data = moveHome;
-        if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
-          return 0;
-        sleep(sleepTime);
+        // std_srvs::SetBool srv;
+        // ROS_INFO_STREAM("control indy7 to move home position");
+        // srv.request.command = moveHome;
+        // if(!Call_service_and_move_next_flow(control_indy7_to_pick_up_cl, srv, go_to_home_by_using_omron))
+        //   return 0;
+        // sleep(sleepTime);
 
         // ROS_INFO_STREAM("control indy7 to move organization position");
         // srv.request.data = moveOrganazation;
@@ -205,13 +213,13 @@ int main(int argc, char **argv)
         //   return 0;
         // sleep(1);
 
-        cout << "goto goal1" << endl;
-        srv.request.data = gotogoal1;
-        if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
-          return 0;
-        cout << "srv.response.success : " << srv.response.success << endl;
-        sleep(sleepTime);
-        break;
+        // cout << "goto goal1" << endl;
+        // srv.request.command = gotogoal1;
+        // if(!Call_service_and_move_next_flow(service_omron_client, srv, listening))
+        //   return 0;
+        // cout << "srv.response.success : " << srv.response.success << endl;
+        // sleep(sleepTime);
+        // break;
       }
 
       case hand_over_something:

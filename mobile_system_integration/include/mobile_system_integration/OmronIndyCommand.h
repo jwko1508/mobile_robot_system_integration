@@ -24,6 +24,7 @@ enum Indy_command
   moveHome = 100,
   moveZero,
   moveOrganazation,
+  getObject,
   drawLine,
   getMarkerPose,
   Move5cmUpInMarkerPose,

@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_srvs
   darknet_ros_msgs
   message_generation
+  command_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -116,7 +117,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES mobile_system_integration
-  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs std_srvs darknet_ros_msgs message_runtime
+  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs std_srvs darknet_ros_msgs command_srvs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -147,7 +148,9 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/mobile_system_integration_node.cpp)
 add_executable(main_node src/main_node.cpp)
 target_link_libraries(main_node ${catkin_LIBRARIES})
-add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
+add_dependencies(main_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# add_dependencies(main_node darknet_ros_msgs_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
