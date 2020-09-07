@@ -4,6 +4,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include "visualization_msgs/Marker.h"
 #include "std_srvs/SetBool.h"
+#include "command_srvs/SetCommand.h"
 #include "nav_msgs/Odometry.h"
 #include "mobile_system_integration/OmronIndyCommand.h"
 
@@ -51,14 +52,14 @@ bool isInputOneCommand = false;
 
 // 현재 receive 함수만 만들었음 이제 연결해줘야 함. plc 수업 가기전 주석 200527 1329
 
-bool OmronServerCB(std_srvs::SetBool::Request  &req,
-                   std_srvs::SetBool::Response &res)
+bool OmronServerCB(command_srvs::SetCommand::Request  &req,
+                   command_srvs::SetCommand::Response &res)
 {
   ros::NodeHandlePtr np = boost::make_shared<ros::NodeHandle>();
   ros::Rate loop_late(100);
   cout << "Omron Server CB is requested..." << endl;
-  cout << __LINE__ << "req.data " << static_cast<int>(req.data) << endl;
-  switch (req.data)
+  cout << __LINE__ << "req.data " << static_cast<int>(req.command) << endl;
+  switch (req.command)
   {
     case gotogoal1:
     {

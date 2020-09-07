@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   nav_msgs
+  command_srvs
   tf2
   tf2_ros
 )
@@ -227,6 +228,7 @@ include_directories(
 
 add_executable(boost_tcp_client src/boost_tcp_client.cpp)
 target_link_libraries(boost_tcp_client ${catkin_LIBRARIES})
+add_dependencies(boost_tcp_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(boost_tcp_client_for_simulation src/boost_tcp_client_for_simulation.cpp)
 target_link_libraries(boost_tcp_client_for_simulation ${catkin_LIBRARIES})
