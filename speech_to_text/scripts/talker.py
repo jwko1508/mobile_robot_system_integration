@@ -1,6 +1,5 @@
-#!/home/jwhan/virtualenvironment/speechV01/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-##/usr/bin/env python
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.

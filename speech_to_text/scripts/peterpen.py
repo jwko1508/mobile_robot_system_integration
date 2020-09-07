@@ -42,13 +42,11 @@
 import speech_recognition as sr
 import time
 import os
-import subprocess
 
 from omron_msgs.srv import SetCmd
 import rospy
 
 from gtts import gTTS
-from io import BytesIO
 
 from std_msgs.msg import String
 from std_msgs.msg import Int32MultiArray
@@ -62,173 +60,146 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 cmdlists = [
-            ["안녕","무슨일인가?",9],
-            ["종료","퇴근이다",0],
-            ["멈춰","멈춘다",8],
-            ["가라","이동한다",2]]
-
-def getKey():
-    tty.setraw(sys.stdin.fileno())
-    rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
-    if rlist:
-        key = sys.stdin.read(1)
-    else:
-        key = ''
-
-    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-    return key
+			["안녕","무슨일인가?",9],
+			["종료","퇴근이다",0],
+			["멈춰","멈춘다",8],
+			["가라","이동한다",2]]
 
 
 def tts_srv_client_cb(req):
-    
-    rospy.wait_for_service('tts_data')
+	
+	rospy.wait_for_service('tts_data')
 
-    try:
-        tts_data = rospy.ServiceProxy('tts_data',SetCmd)
-        resp1 = tts_data(req)
-        return resp1.success
+	try:
+		tts_data = rospy.ServiceProxy('tts_data',SetCmd)
+		resp1 = tts_data(req)
+		return resp1.success
 
-    except rospy.ServiceException as e:
-        print("Service call failed: %s"%e)
+	except rospy.ServiceException as e:
+		print("Service call failed: %s"%e)
 
 
 def talker():
 
-    # get audio from the microphone                                                                       
-    r = sr.Recognizer()    
+	# get audio from the microphone                                                                       
+	r = sr.Recognizer()    
 
-    key = getKey()
-    blank = 1
-    num = 0
+	blank = 1
+	num = 0
 
-    rospy.init_node('speech_to_text', anonymous=True)
+	rospy.init_node('speech_to_text', anonymous=True)
 
-    # srv = rospy.Service('tts_data', tts , tts_srv_cb)
-    # print("Ready to tts_srv.")
-    r.dynamic_energy_threshold = False # asd
-
-
-    # engine = pyttsx3.init() 
-    # voices = engine.getProperty('voices')
-    # engine.setProperty('voices', voices[1].id) # 여성
-
-    while not rospy.is_shutdown():
-
-        YouSaid = ""
-        with sr.Microphone() as source:                                                                       
-            
-            #print(type(YouSaid))
-            try:
-
-                if num == 1:
-                    
-                    blank = 0
-
-                    print("speak command")
-                    audio = r.listen(source, timeout=1,phrase_time_limit=5)
-                    YouSaid = r.recognize_google(audio, language='ko-kr')
-
-                    for cmd in range(len(cmdlists)) :
-
-                        if YouSaid == cmdlists[cmd][0]:
-
-                            print("나 : " + YouSaid)
-                            print("옴론 : " + cmdlists[cmd][1])
-                            tts_cmd = gTTS(text=cmdlists[cmd][1], lang='ko')
-                            tts_cmd.save("%s.mp3" % cmdlists[cmd][1])
-                            os.system("mpg123 -q %s.mp3" % cmdlists[cmd][1])
-                            os.remove("%s.mp3" % cmdlists[cmd][1])
-                            cmdnum = cmdlists[cmd][2]
-                            s = tts_srv_client_cb(cmdnum)
-                            YouSaid = ""
-                            num = 0
-
-                if num == 0 :
-
-                    blank = 1
-
-                    # print("Please speak")  
-                    audio = r.listen(source, timeout=1,phrase_time_limit=3)
-                    YouSaid = r.recognize_google(audio, language='ko-kr')
-                    #YouSaid = r.recognize_google(audio)
-                    print("나 : " + YouSaid)
+	# srv = rospy.Service('tts_data', tts , tts_srv_cb)
+	# print("Ready to tts_srv.")
+	r.dynamic_energy_threshold = False # asd
 
 
-                if YouSaid.find("피터팬") != -1 :
+	# engine = pyttsx3.init() 
+	# voices = engine.getProperty('voices')
+	# engine.setProperty('voices', voices[1].id) # 여성
 
-                    blank = 1
+	while not rospy.is_shutdown():
 
-                    num = 1
-                    print("옴론 : " + "말씀해주세요. 주인님.")
-                    # engine.setProperty('voice')
-                    # engine.say("말씀하라. 주인.") 
-                    # engine.runAndWait() 
-                    tts = gTTS(text="말씀해주세요. 주인님.", lang='ko')
-                    tts.save("호출.mp3")
-                    os.system("mpg123 -q 호출.mp3")
+		YouSaid = ""
+		with sr.Microphone() as source:                                                                       
+			
+			try:
+				# print("hi")
+				if num == 1:
+					
+					blank = 0
 
-                    # opener ="open" if sys.platform == "darwin" else "xdg-open"
-                    # subprocess.call([opener, "호출.mp3"])
-                    # print("Speaking.....")
-                    # time.sleep(1)
-                    # os.remove("호출.mp3")
-                    # time.sleep(4)
+					print("speak command")
+					audio = r.listen(source, timeout=6,phrase_time_limit=6)
+					YouSaid = r.recognize_google(audio, language='ko-kr')
 
-                # if key == 't':
-                #   num = 1
-                # else :
-                #   num = 0
-                #   print("옴론 : " + "명령하고싶으면 암호를 말하라.")
+					for cmd in range(len(cmdlists)) :
 
-                
+						if YouSaid == cmdlists[cmd][0]:
+
+							print("나 : " + YouSaid)
+							print("옴론 : " + cmdlists[cmd][1])
+							tts_cmd = gTTS(text=cmdlists[cmd][1], lang='ko')
+							tts_cmd.save("%s.mp3" % cmdlists[cmd][1])
+							os.system("mpg123 -q %s.mp3" % cmdlists[cmd][1])
+							os.remove("%s.mp3" % cmdlists[cmd][1])
+							cmdnum = cmdlists[cmd][2]
+							s = tts_srv_client_cb(cmdnum)
+							print("%s" %s)
+							YouSaid = ""
+							num = 0
+
+				if num == 0 :
+
+					blank = 1
+
+					# print("Please speak")  
+					audio = r.listen(source, timeout=1,phrase_time_limit=3)
+					YouSaid = r.recognize_google(audio, language='ko-kr')
+					#YouSaid = r.recognize_google(audio)
+					print("나 : " + YouSaid)
 
 
+				if YouSaid.find("피터팬") != -1 :
 
-                    # print("나 : " + YouSaid2)
+					blank = 1
 
-                    # blank = YouSaid2
+					num = 1
+					print("옴론 : " + "듣는다.")
+					# engine.setProperty('voice')
+					# engine.say("말씀하라. 주인.") 
+					# engine.runAndWait() 
+					tts = gTTS(text="듣는다.", lang='ko')
+					tts.save("호출.mp3")
+					os.system("mpg123 -q 호출.mp3")
+					os.remove("호출.mp3")
 
-                    # YouSaid2 = ""
+			except sr.WaitTimeoutError:
+				# print("werror")
+				num = 0
 
-                    # num = 0
+				if blank != 1:
+					print("옴론 : " + "무시한다.")
+					tts = gTTS(text="무시한다.", lang='ko')
+					tts.save("시간초과.mp3")
+					os.system("mpg123 -q 시간초과.mp3")
+					os.remove("시간초과.mp3")
+					before = time.time()
 
-                #YouSaid = r.recognize_google(audio)
-                #print(type(YouSaid))
+					blank = 1
+				# print("listening timed out while waiting for phrase to start")
+				# YouSaid = "listening timed out while waiting for phrase to start"
+				continue
+			except sr.UnknownValueError:
+				# print("uerror")
+				num = 0
 
-            except sr.WaitTimeoutError:
-                # print("listening timed out while waiting for phrase to start")
-                # YouSaid = "listening timed out while waiting for phrase to start"
-                continue
-            except sr.UnknownValueError:
+				if blank != 1:
+					print("옴론 : " + "무시한다.")
+					tts = gTTS(text="무시한다.", lang='ko')
+					tts.save("시간초과.mp3")
+					os.system("mpg123 -q 시간초과.mp3")
+					os.remove("시간초과.mp3")
+					before = time.time()
 
-                if blank != 1:
-                    print("옴론 : " + "명령안할거면 부르지마라.")
-                    tts = gTTS(text="명령안할거면 부르지마라.", lang='ko')
-                    tts.save("시간초과.mp3")
-                    os.system("mpg123 -q 시간초과.mp3")
-                    before = time.time()
+					blank = 1
 
-                    num = 0
+				continue
+			except sr.RequestError as e:
+				print("Could not request results; {0}".format(e))
 
-                    blank = 1
+		if YouSaid == "":
+			YouSaid = "Could not understand audio"
 
-                continue
-            except sr.RequestError as e:
-                print("Could not request results; {0}".format(e))
-
-        if YouSaid == "":
-            YouSaid = "Could not understand audio"
-
-        # hello_str = "hello world %s" % YouSaid
-        #if YouSaid == "coffee":
-        # YouSaid = "Please give me a cup of coffee."
-        # rospy.loginfo(YouSaid)
-        rospy.spin()
+		# hello_str = "hello world %s" % YouSaid
+		#if YouSaid == "coffee":
+		# YouSaid = "Please give me a cup of coffee."
+		# rospy.loginfo(YouSaid)
 
 if __name__ == '__main__':
-    try:
-        settings = termios.tcgetattr(sys.stdin)
+	try:
+		settings = termios.tcgetattr(sys.stdin)
 
-        talker()
-    except rospy.ROSInterruptException:
-        pass
+		talker()
+	except rospy.ROSInterruptException:
+		pass
