@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/jwko/gra_ws/src/speech_recognition/cmake-build-debug/devel/setup.sh

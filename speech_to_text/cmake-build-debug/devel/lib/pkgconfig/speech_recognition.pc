@@ -1,0 +1,8 @@
+prefix=/home/jwko/gra_ws/src/speech_recognition/cmake-build-debug/devel
+
+Name: speech_recognition
+Description: Description of speech_recognition
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
