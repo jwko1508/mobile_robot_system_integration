@@ -1,0 +1,4 @@
+int64 num
+---
+bool success
+string message
