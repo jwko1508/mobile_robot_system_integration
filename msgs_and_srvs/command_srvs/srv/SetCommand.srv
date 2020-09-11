@@ -1,0 +1,4 @@
+uint16 command
+---
+bool success
+string message
