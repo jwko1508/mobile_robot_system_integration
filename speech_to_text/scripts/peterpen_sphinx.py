@@ -54,6 +54,7 @@ from std_msgs.msg import Int32MultiArray
 import sys
 
 import sys, select, termios, tty
+from pocketsphinx import LiveSpeech, get_model_path
 
 reload(sys)
 
@@ -119,107 +120,115 @@ def talker():
 	# voices = engine.getProperty('voices')
 	# engine.setProperty('voices', voices[1].id) # 여성
 
-	while not rospy.is_shutdown():
+	model_path = get_model_path()
 
-		YouSaid = ""
-		with sr.Microphone() as source:                                                                       
-			
-			try:
-				# print("hi")
-				if num == 1:
-					
-					blank = 0
+	speech = LiveSpeech(
+		verbose=False,
+		sampling_rate=16000,
+		buffer_size=2048,
+		no_search=False,
+		full_utt=False,
+		hmm=os.path.join(model_path, 'en-us'),
+		lm=os.path.join(model_path, 'en-us.lm.bin'),
+		dic=os.path.join(model_path, 'cmudict-en-us.dict')
+	)
 
-					print("speak command")
-					audio = r.listen(source, timeout=3,phrase_time_limit=3)
-					YouSaid = r.recognize_sphinx(audio, language='en-US')
+	for YouSaid in speech:
+		print(YouSaid)
 
-					for cmd in range(len(cmdlists)) :
+		if num == 1:
+				
+				blank = 0
 
-						if YouSaid == cmdlists[cmd][0]:
+				print("speak command")
+				audio = r.listen(source, timeout=3,phrase_time_limit=3)
+				YouSaid = r.recognize_sphinx(audio, language='ko-kr')
 
-							print("나 : " + YouSaid)
-							print("옴론 : " + cmdlists[cmd][1])
-							tts_cmd = gTTS(text=cmdlists[cmd][1], lang='ko')
-							tts_cmd.save("%s.mp3" % cmdlists[cmd][1])
-							os.system("mpg123 -q %s.mp3" % cmdlists[cmd][1])
-							os.remove("%s.mp3" % cmdlists[cmd][1])
-							cmdnum = cmdlists[cmd][2]
-							s = tts_srv_client_cb(cmdnum)
-							YouSaid = ""
-							num = 0
+				for cmd in range(len(cmdlists)) :
 
-				if num == 0 :
+					if YouSaid == cmdlists[cmd][0]:
 
-					blank = 1
+						print("나 : " + YouSaid)
+						print("옴론 : " + cmdlists[cmd][1])
+						tts_cmd = gTTS(text=cmdlists[cmd][1], lang='ko')
+						tts_cmd.save("%s.mp3" % cmdlists[cmd][1])
+						os.system("mpg123 -q %s.mp3" % cmdlists[cmd][1])
+						os.remove("%s.mp3" % cmdlists[cmd][1])
+						cmdnum = cmdlists[cmd][2]
+						s = tts_srv_client_cb(cmdnum)
+						YouSaid = ""
+						num = 0
 
-					print("Please speak")  
-					audio = r.listen(source, timeout=1,phrase_time_limit=2)
-					YouSaid = r.recognize_sphinx(audio, language='en-US')
-					#YouSaid = r.recognize_google(audio)
-					print("나 : " + YouSaid)
+		if num == 0 :
+
+			blank = 1
+
+			print("Please speak")  
+			audio = r.listen(source, timeout=1,phrase_time_limit=2)
+			YouSaid = r.recognize_google(audio, language='ko-kr')
+			#YouSaid = r.recognize_google(audio)
+			print("나 : " + YouSaid)
 
 
-				if YouSaid.find("피터팬") != -1 :
+		if YouSaid.find("피터팬") != -1 :
 
-					blank = 1
+			blank = 1
 
-					num = 1
-					print("옴론 : " + "듣고있어요.")
-					# engine.setProperty('voice')
-					# engine.say("말씀하라. 주인.") 
-					# engine.runAndWait() 
-					tts = gTTS(text="듣고있어요.", lang='ko')
-					tts.save("호출.mp3")
-					os.system("mpg123 -q 호출.mp3")
-					os.remove("호출.mp3")
+			num = 1
+			print("옴론 : " + "듣고있어요.")
+			# engine.setProperty('voice')
+			# engine.say("말씀하라. 주인.") 
+			# engine.runAndWait() 
+			tts = gTTS(text="듣고있어요.", lang='ko')
+			tts.save("호출.mp3")
+			os.system("mpg123 -q 호출.mp3")
+			os.remove("호출.mp3")
 
-			except sr.WaitTimeoutError:
-				# print("werror")
-				num = 0
+	# except sr.WaitTimeoutError:
+	# 	# print("werror")
+	# 	num = 0
 
-				if blank != 1:
-					print("옴론 : " + "무슨말인지 모르겠어요")
-					tts = gTTS(text="무슨말인지 모르겠어요.", lang='ko')
-					tts.save("시간초과.mp3")
-					os.system("mpg123 -q 시간초과.mp3")
-					os.remove("시간초과.mp3")
-					before = time.time()
+	# 	if blank != 1:
+	# 		print("옴론 : " + "무슨말인지 모르겠어요")
+	# 		tts = gTTS(text="무슨말인지 모르겠어요.", lang='ko')
+	# 		tts.save("시간초과.mp3")
+	# 		os.system("mpg123 -q 시간초과.mp3")
+	# 		os.remove("시간초과.mp3")
+	# 		before = time.time()
 
-					blank = 1
-				# print("listening timed out while waiting for phrase to start")
-				# YouSaid = "listening timed out while waiting for phrase to start"
-				continue
-			except sr.UnknownValueError:
-				# print("uerror")
-				num = 0
+	# 		blank = 1
+	# 	# print("listening timed out while waiting for phrase to start")
+	# 	# YouSaid = "listening timed out while waiting for phrase to start"
+	# 	continue
+	# except sr.UnknownValueError:
+	# 	# print("uerror")
+	# 	num = 0
 
-				if blank != 1:
-					print("옴론 : " + "무슨말인지 모르겠어요.")
-					tts = gTTS(text="무슨말인지 모르겠어요.", lang='ko')
-					tts.save("시간초과.mp3")
-					os.system("mpg123 -q 시간초과.mp3")
-					os.remove("시간초과.mp3")
-					before = time.time()
+	# 	if blank != 1:
+	# 		print("옴론 : " + "무슨말인지 모르겠어요.")
+	# 		tts = gTTS(text="무슨말인지 모르겠어요.", lang='ko')
+	# 		tts.save("시간초과.mp3")
+	# 		os.system("mpg123 -q 시간초과.mp3")
+	# 		os.remove("시간초과.mp3")
+	# 		before = time.time()
 
-					blank = 1
+	# 		blank = 1
 
-				continue
-			except sr.RequestError as e:
-				print("Could not request results; {0}".format(e))
+	# 	continue
+	# except sr.RequestError as e:
+	# 	print("Could not request results; {0}".format(e))
 
 		if YouSaid == "":
 			YouSaid = "Could not understand audio"
 
-		# hello_str = "hello world %s" % YouSaid
-		#if YouSaid == "coffee":
-		# YouSaid = "Please give me a cup of coffee."
-		# rospy.loginfo(YouSaid)
+	
 
 if __name__ == '__main__':
 	try:
 		settings = termios.tcgetattr(sys.stdin)
 
-		talker()
+		# talker()
+
+
 	except rospy.ROSInterruptException:
 		pass

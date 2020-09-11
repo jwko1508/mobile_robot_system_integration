@@ -170,6 +170,7 @@ install(PROGRAMS
   scripts/speech_to_text_timgkerbell.py
   scripts/stt.py
   scripts/peterpen.py
+  scripts/peterpen_sphinx.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
