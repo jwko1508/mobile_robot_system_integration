@@ -69,7 +69,7 @@ class snowboy_peterpen(object):
     def __init__(self, modelName = 'peterpen.pmdl',
                     callbackfunc = snowboydecoder.play_audio_file):
         model = curpath + modelpath + modelName
-        self.detector = snowboydecoder.HotwordDetector(model, sensitivity=0.5)
+        self.detector = snowboydecoder.HotwordDetector(model, sensitivity=0.55)
         self.callbackfun = callbackfunc
         self.stoped = True
         self.t = threading.Thread(target=self._run)
@@ -119,7 +119,7 @@ class snowboy_multy(object):
                  curpath + modelpath + modelName[1],
                  curpath + modelpath + modelName[2],
                  curpath + modelpath + modelName[3],]
-        self.detector = snowboydecoder.HotwordDetector(model, sensitivity=0.5)
+        self.detector = snowboydecoder.HotwordDetector(model, sensitivity=0.47)
         self.callbackfun = callbackfunc
         self.stoped = True
         self.t = threading.Thread(target=self._run)

@@ -44,6 +44,7 @@ import time
 import os
 
 from command_srvs.srv import SetCommand
+
 import rospy
 
 from gtts import gTTS
@@ -60,6 +61,8 @@ import threading
 import signal
 from triggerword import snowboy as sb
 from triggerword import snowboydecoder
+
+import playsound
 
 reload(sys)
 
@@ -130,6 +133,7 @@ def tts_srv_client_cb(req):
 			# tts = gTTS(text="실행 완료하였습니다.", lang='ko')
 			# tts.save("실행완료하였습니다.mp3")
 			os.system("mpg123 -q 실행완료하였습니다.mp3")
+			# playsound.playsound('/home/jwko/gra_ws/src/scripts/triggerword/mp3/실행완료하였습니다.mp3', True)
 			# os.remove("실행완료하였습니다.mp3")
 
 		else:
@@ -137,6 +141,7 @@ def tts_srv_client_cb(req):
 			# tts = gTTS(text="실패했습니다.", lang='ko')
 			# tts.save("실패했습니다.mp3")
 			os.system("mpg123 -q 실패했습니다.mp3")
+			# playsound.playsound('/home/jwko/gra_ws/rc/speech_to_text/scripts/triggerword/mp3/실패했습니다.mp3', True)
 			# os.remove("실패했습니다.mp3")
 
 		return resp1.success
@@ -238,7 +243,7 @@ def talker():
 							num = 0
 							break
 
-						if count == 6 :
+						if count == 11 :
 							num = 0
 							snow_multy.stop()
 							print("옴론 : " + "무슨말인지 모르겠어요")
