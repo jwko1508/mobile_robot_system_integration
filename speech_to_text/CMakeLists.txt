@@ -165,12 +165,13 @@ include_directories(
 # )
 
 install(PROGRAMS 
-  scripts/speech_to_text.py
-  scripts/speech_to_text_error.py
-  scripts/speech_to_text_timgkerbell.py
-  scripts/stt.py
+  # scripts/speech_to_text.py
+  # scripts/speech_to_text_error.py
+  # scripts/speech_to_text_timgkerbell.py
+  # scripts/stt.py
   scripts/peterpen.py
-  scripts/peterpen_sphinx.py
+  scripts/peterpen_snowboy.py
+  scripts/snowboydecoder.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
