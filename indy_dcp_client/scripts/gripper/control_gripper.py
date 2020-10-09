@@ -13,6 +13,12 @@ import socket
 import sys
 import time
 
+WRITE = 0x01
+READ = 0x00
+INTERNAL_DIRECTION = 0x02
+EXTERNAL_DIRECTION = 0x03
+INITIALIZATION_RW = 0x01
+INITIALIZATION_GRIPPER = 0x02
 
 class control_gripper():
   def __init__(self, HOST, PORT, Gripper_ID):
@@ -40,12 +46,13 @@ class control_gripper():
     self.READ = 0x00
     self.INTERNAL_DIRECTION = 0x02
     self.EXTERNAL_DIRECTION = 0x03
+    self.INITIALIZATION_RW = 0x01
+    self.INITIALIZATION_GRIPPER = 0x02
+
+    time.sleep(5)
     # print(self.command_data)
     # print(type(self.frame_end))
     # print(sys.getsizeof(self.command_data))
-
-    self.gripper_initialize(sub_function=0x02)
-
 
   def __def__(self):
     self.disconnect()
@@ -58,7 +65,7 @@ class control_gripper():
     print('disconnect the gripper')
     self.client_socket.close()
 
-  def gripper_initialize(self, sub_function = 0x02, read_or_write = 0x01):
+  def gripper_initialize(self, sub_function = INITIALIZATION_GRIPPER, read_or_write = WRITE):
     """
     sub_fuction : 0x01, 0x02
     0x01 : the function of this command is to read and write whether feedback after finish initialization.
@@ -96,6 +103,7 @@ class control_gripper():
     else:
       print("[DEBUG] early-return failed. this branch cannot be reach here.")
 
+    
 
   def set_force_of_gripper(self, force_value, direction):
     """
@@ -154,6 +162,25 @@ class control_gripper():
     self.input_data_to_command_data(data)
     self.send_data()
     print('has set the position : {} ...'. format(position))
+    time.sleep(1)
+
+
+  def get_position(self):
+    """
+    return : position : int
+    """
+    print("getting the gripper's position.")
+    position_function_register = 0x06
+    sub_function_register = 0x02 
+
+    self.command_data[5] = position_function_register
+    self.command_data[6] = sub_function_register
+    self.command_data[7] = self.READ
+    data = [0x00, 0x00, 0x00, 0x00]
+    self.input_data_to_command_data(data)
+    self.send_data()
+    _, position = self.receive_data()
+    return position
 
   def wait_for_moving(self):
     feedback_function_register = 0x0f
@@ -163,16 +190,18 @@ class control_gripper():
     self.command_data[6] = sub_function_register
     self.command_data[7] = self.READ
 
-    data = [0x00, 0x00, 0x00, 0x00]
-    self.input_data_to_command_data(data)
+    # data = [0x00, 0x00, 0x00, 0x00]
+    # self.input_data_to_command_data(data)
 
     return_data = 0
     isArrived = False
     while not isArrived:
+      data = [0x00, 0x00, 0x00, 0x00]
+      self.input_data_to_command_data(data)
       self.send_data()
       _, return_data = self.receive_data()
       # print(return_command_data)
-      print(return_data)
+      print("return_data :", return_data)
       if return_data == 2:
         print("gripper position is arrived.")
         isArrived = True
@@ -180,6 +209,9 @@ class control_gripper():
         print("be get object.")
         isArrived = True
       time.sleep(0.01)
+      
+    time.sleep(1)
+    
 
   def input_data_to_command_data(self, data_):
     for i in range(4):
@@ -208,6 +240,9 @@ class control_gripper():
     
     return received_command_data, data
 
+  def print_current_command_data(self):
+    print(self.command_data)
+
   def doTest(self):
     for _ in range(0,5):
       msg = 'hello'
@@ -233,20 +268,65 @@ class control_gripper():
 
 
 # if __name__ == '__main__':
-#   Control_gripper = control_gripper('192.168.1.29', PORT=8888, Gripper_ID=1)
-#   waiting_time = 1.5
-#   time.sleep(9)
+  # Control_gripper = control_gripper('192.168.1.29', PORT=8888, Gripper_ID=1)
+  # # waiting_time = 4
+  # Control_gripper.gripper_initialize(sub_function=0x02)
+  # # time.sleep(8)
 
-#   Control_gripper.set_force_of_gripper(20, Control_gripper.EXTERNAL_DIRECTION)
-#   Control_gripper.set_force_of_gripper(20, Control_gripper.INTERNAL_DIRECTION)
+  # Control_gripper.set_force_of_gripper(20, Control_gripper.EXTERNAL_DIRECTION)
+  # time.sleep(1)
+  # Control_gripper.set_force_of_gripper(20, Control_gripper.INTERNAL_DIRECTION)
+  # time.sleep(1)
 
-#   # while True:
-#   Control_gripper.set_position(0)
-#   time.sleep(waiting_time)
-#   Control_gripper.set_position(20)
-#   time.sleep(waiting_time)
-#   Control_gripper.set_position(60)
-#   time.sleep(waiting_time)
+  # # while True:
+  # # Control_gripper.set_position(0)
+  # # time.sleep(2)
+  # # Control_gripper.wait_for_moving()
+
+  # # time.sleep(3)
+  # # Control_gripper.wait_for_moving()
+
+  # Control_gripper.set_position(100)
+  # time.sleep(1.2)
+  # Control_gripper.set_position(0)
+  # time.sleep(1.2)
+
+
+  # Control_gripper.set_position(0)
+  # time.sleep(2)
+
+  # while True:
+  #   pass
+  # Control_gripper.wait_for_moving()
+  # print(1111)
+  # Control_gripper.print_current_command_data()
+
+  # Control_gripper.set_position(50)
+  # Control_gripper.wait_for_moving()
+  # # Control_gripper.wait_for_moving()
+
+  # Control_gripper.set_position(10)
+  # Control_gripper.wait_for_moving()
+
+  # Control_gripper.set_position(90)
+  # Control_gripper.wait_for_moving()
+
+  # Control_gripper.set_position(10)
+  # Control_gripper.wait_for_moving()
+
+  # Control_gripper.wait_for_moving()
+  # time.sleep(3)
+  # position = Control_gripper.get_position()
+  # print("position :", position)
+
+
+  # time.sleep(waiting_time)
+  # Control_gripper.set_position(0)
+  # Control_gripper.wait_for_moving()
+  # time.sleep(waiting_time)
+  # Control_gripper.set_position(100)
+  # Control_gripper.wait_for_moving()
+  # time.sleep(waiting_time)
 
   # Control_gripper.set_position(100)
   # time.sleep(waiting_time)
