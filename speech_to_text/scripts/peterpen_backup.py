@@ -172,7 +172,7 @@ def talker():
 					# engine.runAndWait() 
 					# tts = gTTS(text="네.", lang='ko')
 					# tts.save("호출.mp3")
-					os.system("mpg123 -q /home/jwhan/small_self_driving_ws/src/speech_to_text/scripts/dong.mp3")
+					# os.system("mpg123 -q 호출.mp3")
 					# os.remove("호출.mp3")
 
 			except sr.WaitTimeoutError:

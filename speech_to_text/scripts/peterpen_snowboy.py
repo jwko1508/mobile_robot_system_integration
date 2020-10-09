@@ -62,7 +62,7 @@ import signal
 from triggerword import snowboy as sb
 from triggerword import snowboydecoder
 
-import playsound
+# import playsound
 
 reload(sys)
 
