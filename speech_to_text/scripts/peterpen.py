@@ -136,7 +136,7 @@ def talker():
 					YouSaid = r.recognize_google(audio, language='ko-kr')
 					for cmd in range(len(cmdlists)) :
 
-						if YouSaid == cmdlists[cmd][0]:
+						if YouSaid.find(cmdlists[cmd][0]) != -1:
 
 							print("나 : " + YouSaid)
 							print("옴론 : " + cmdlists[cmd][1])
@@ -172,7 +172,7 @@ def talker():
 					# engine.runAndWait() 
 					# tts = gTTS(text="네.", lang='ko')
 					# tts.save("호출.mp3")
-					os.system("mpg123 -q /home/jwhan/small_self_driving_ws/src/speech_to_text/scripts/dong.mp3")
+					os.system("mpg123 -q dong.mp3")
 					# os.remove("호출.mp3")
 
 			except sr.WaitTimeoutError:
